@@ -1,0 +1,195 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "CAP Theorem: Consistency vs Availability khi Network Partition",
+    "output": "diagram.html",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "flow",
+      "label": "Trang thai he thong"
+    },
+    {
+      "id": "cp",
+      "label": "Nhanh chon Consistency (CP)",
+      "variant": "exception"
+    },
+    {
+      "id": "ap",
+      "label": "Nhanh chon Availability (AP)"
+    }
+  ],
+  "phases": [
+    {
+      "id": "normal",
+      "label": "Binh thuong",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "fault",
+      "label": "Partition xay ra",
+      "fromCol": 2,
+      "toCol": 3
+    },
+    {
+      "id": "tradeoff",
+      "label": "CAP trade-off",
+      "fromCol": 4,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "recover",
+      "label": "Khoi phuc",
+      "fromCol": 5,
+      "toCol": 5
+    }
+  ],
+  "mainPath": [
+    "client",
+    "sync_state",
+    "partition",
+    "read_b",
+    "ap_choice",
+    "reconcile"
+  ],
+  "nodes": [
+    {
+      "id": "client",
+      "lane": "flow",
+      "col": 0,
+      "type": "external",
+      "label": "Client",
+      "sublabel": "doc/ghi du lieu",
+      "width": 150
+    },
+    {
+      "id": "sync_state",
+      "lane": "flow",
+      "col": 1,
+      "type": "database",
+      "label": "Node A & B",
+      "sublabel": "dong bo binh thuong",
+      "width": 150
+    },
+    {
+      "id": "partition",
+      "lane": "flow",
+      "col": 2,
+      "type": "security",
+      "label": "Network Partition",
+      "sublabel": "A <-> B mat ket noi",
+      "width": 150
+    },
+    {
+      "id": "read_b",
+      "lane": "flow",
+      "col": 3,
+      "type": "external",
+      "label": "Doc tu Node B",
+      "sublabel": "trong luc partition",
+      "width": 150
+    },
+    {
+      "id": "cp_choice",
+      "lane": "cp",
+      "col": 4,
+      "type": "security",
+      "label": "CP: Tu choi/loi",
+      "sublabel": "cho xac nhan voi A",
+      "width": 150
+    },
+    {
+      "id": "ap_choice",
+      "lane": "ap",
+      "col": 4,
+      "type": "backend",
+      "label": "AP: Tra du lieu cu",
+      "sublabel": "co the stale",
+      "width": 150
+    },
+    {
+      "id": "reconcile",
+      "lane": "flow",
+      "col": 5,
+      "type": "database",
+      "label": "Partition heals",
+      "sublabel": "re-sync A & B",
+      "width": 150
+    }
+  ],
+  "edges": [
+    {
+      "id": "client-sync",
+      "from": "client",
+      "to": "sync_state",
+      "variant": "default"
+    },
+    {
+      "id": "sync-partition",
+      "from": "sync_state",
+      "to": "partition",
+      "label": "mang loi",
+      "variant": "default"
+    },
+    {
+      "id": "partition-read",
+      "from": "partition",
+      "to": "read_b",
+      "label": "client van goi Node B",
+      "variant": "default"
+    },
+    {
+      "id": "read-cp",
+      "from": "read_b",
+      "to": "cp_choice",
+      "label": "chon Consistency",
+      "variant": "security",
+      "role": "branch"
+    },
+    {
+      "id": "read-ap",
+      "from": "read_b",
+      "to": "ap_choice",
+      "label": "chon Availability",
+      "variant": "emphasis",
+      "role": "branch"
+    },
+    {
+      "id": "cp-reconcile",
+      "from": "cp_choice",
+      "to": "reconcile",
+      "variant": "security",
+      "role": "return"
+    },
+    {
+      "id": "ap-reconcile",
+      "from": "ap_choice",
+      "to": "reconcile",
+      "variant": "dashed",
+      "role": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "orange",
+      "title": "CAP la gi",
+      "items": [
+        "Consistency: moi node tra ve du lieu moi nhat giong nhau",
+        "Availability: moi request van nhan duoc response (khong loi)",
+        "Partition tolerance: he thong van hoat dong khi mang bi chia cat"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Khi partition xay ra",
+      "items": [
+        "P gan nhu bat buoc phai chap nhan trong he phan tan thuc te",
+        "Cau hoi thuc su la chon C hay A khi P xay ra, khong phai chon ca 3"
+      ]
+    }
+  ]
+}

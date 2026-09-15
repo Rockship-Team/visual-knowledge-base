@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Idempotency Key — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/idempotency-key" target="_blank" rel="noopener">Xem trên GitHub</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Idempotency Key: an toàn khi retry API</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">api-design</span>
+    <span class="tag">reliability</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
+      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+    </div>
+    <iframe src="diagram.html" title="Idempotency key sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose">
+    <h2>Tóm tắt</h2>
+    <p><strong>Idempotency key</strong> là một token duy nhất do client sinh ra và gửi kèm mỗi request có side effect (ví dụ tạo thanh toán). Nó giúp server phân biệt được "request mới" với "request retry của cùng một hành động", để một thao tác không vô tình bị thực hiện hai lần khi mạng không ổn định.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> gọi <code>POST /charge</code> kèm header <code>Idempotency-Key: abc123</code></li>
+      <li><strong>API</strong> kiểm tra Idempotency Store, chưa thấy key này</li>
+      <li>API gọi <strong>Payment Gateway</strong> để charge thẻ, gateway trả về thành công</li>
+      <li>API lưu kết quả vào Idempotency Store, gắn với key <code>abc123</code></li>
+      <li>API trả <code>200 OK</code> về client — nhưng response này <strong>bị mất trên đường mạng</strong> (timeout)</li>
+      <li>Client không biết request trước có thành công hay không, nên <strong>gửi lại y hệt request</strong> với cùng <code>Idempotency-Key: abc123</code></li>
+      <li>API kiểm tra Idempotency Store, thấy key đã có kết quả — <strong>trả thẳng kết quả cũ</strong>, không gọi lại Payment Gateway</li>
+    </ol>
+    <p class="callout">Kết quả: thẻ chỉ bị charge <strong>đúng một lần</strong>, dù client gửi request hai lần.</p>
+
+    <h2>Vấn đề nếu không có idempotency key</h2>
+    <ul>
+      <li>Sau timeout, client không có cách nào biết chắc request trước đã xử lý xong hay chưa</li>
+      <li>Retry một cách ngây thơ (gửi lại request giống hệt) có thể khiến side effect (charge, tạo đơn hàng, gửi email...) bị lặp lại</li>
+      <li>Server không có cơ chế nào để nhận ra hai request đến từ cùng một hành động của người dùng</li>
+    </ul>
+
+    <h2>Cách triển khai đúng</h2>
+    <ul>
+      <li>Idempotency key do <strong>client</strong> sinh ra (thường là UUID) và gửi kèm trong header, không phải server tự tạo</li>
+      <li>Server lưu <code>key</code> + hash của request body + kết quả xử lý vào một bảng riêng (Idempotency Store)</li>
+      <li>Đặt <strong>unique constraint</strong> trên cột key để tránh ghi trùng khi có tranh chấp</li>
+      <li>Nếu hai retry đến gần như đồng thời, cần thêm lock/transaction khi ghi vào Idempotency Store để tránh chính request retry lại tạo ra race condition mới</li>
+      <li>Idempotency key nên có TTL hợp lý và gắn với payload hash để tránh bị tái sử dụng sai mục đích cho một request khác</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/idempotency-key/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../">← Quay lại danh mục</a>
+  </div>
+</footer>
+</body>
+</html>

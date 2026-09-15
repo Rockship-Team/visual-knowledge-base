@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CAP Theorem — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/cap-theorem" target="_blank" rel="noopener">Xem trên GitHub</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">CAP Theorem: Consistency vs Availability khi Network Partition</h1>
+  <div class="topic-meta">
+    <span class="badge">workflow</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">trade-off</span>
+    <span class="tag">replication</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
+      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+    </div>
+    <iframe src="diagram.html" title="CAP theorem workflow diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose">
+    <h2>Tóm tắt</h2>
+    <p><strong>CAP theorem</strong> nói rằng một hệ thống dữ liệu phân tán không thể đồng thời đảm bảo cả 3 tính chất: <strong>C</strong>onsistency (mọi node trả về dữ liệu mới nhất giống nhau), <strong>A</strong>vailability (mọi request đều nhận được response, không lỗi), và <strong>P</strong>artition tolerance (hệ thống vẫn hoạt động khi mạng giữa các node bị chia cắt). Trong thực tế, Partition tolerance gần như bắt buộc phải chấp nhận — mạng sẽ luôn có lúc lỗi — nên câu hỏi thật sự không phải "chọn cái nào trong 3 cái", mà là <strong>chọn C hay A khi partition xảy ra</strong>.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li>Bình thường: Client đọc/ghi qua <strong>Node A</strong> và <strong>Node B</strong>, hai node đồng bộ liên tục</li>
+      <li><strong>Network Partition</strong> xảy ra: Node A và Node B mất kết nối với nhau, nhưng cả hai vẫn nhận được request từ client</li>
+      <li>Client gửi một request đọc tới Node B trong lúc partition — hệ thống phải chọn một trong hai nhánh:</li>
+      <li><strong>Nhánh CP</strong>: Node B từ chối trả lời hoặc trả lỗi vì không xác nhận được nó đang có dữ liệu mới nhất từ Node A → giữ Consistency, hy sinh Availability</li>
+      <li><strong>Nhánh AP</strong>: Node B vẫn trả lời bằng dữ liệu cục bộ, có thể đã cũ (stale) → giữ Availability, hy sinh Consistency</li>
+      <li>Khi partition được khắc phục, hai node đồng bộ lại (reconcile)</li>
+    </ol>
+    <p class="callout">P không phải là lựa chọn — mạng chắc chắn sẽ partition. Điều engineer thực sự quyết định là hệ thống làm gì <strong>khi</strong> nó xảy ra: từ chối phục vụ để giữ đúng, hay phục vụ tạm với dữ liệu có thể cũ.</p>
+
+    <h2>Ứng dụng thực tế</h2>
+    <ul>
+      <li>Hệ thiên về <strong>CP</strong>: các hệ dùng consensus như etcd, ZooKeeper, hoặc RDBMS với strong consistency — ưu tiên đúng dữ liệu hơn là luôn trả lời được</li>
+      <li>Hệ thiên về <strong>AP</strong>: Cassandra, DynamoDB kiểu eventual consistency — ưu tiên luôn phản hồi, chấp nhận dữ liệu có thể tạm thời không khớp giữa các node</li>
+      <li>Nhiều hệ thống hiện đại cho phép tune per-operation (ví dụ mức consistency theo từng query trong Cassandra) thay vì cố định toàn hệ thống vào một phía</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/cap-theorem/spec.workflow.json" target="_blank" rel="noopener">spec.workflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate workflow path/to/spec.workflow.json --quality showcase --json
+node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../">← Quay lại danh mục</a>
+  </div>
+</footer>
+</body>
+</html>

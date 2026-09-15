@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eventual Consistency: Read-Your-Writes Anomaly — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/eventual-consistency" target="_blank" rel="noopener">Xem trên GitHub</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Eventual Consistency: Read-Your-Writes Anomaly</h1>
+  <div class="topic-meta">
+    <span class="badge">dataflow</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">replication</span>
+    <span class="tag">consistency</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
+      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+    </div>
+    <iframe src="diagram.html" title="Eventual consistency read-your-writes dataflow diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose">
+    <h2>Tóm tắt</h2>
+    <p>Minh họa hiện tượng <strong>read-your-writes anomaly</strong> trong một hệ thống dùng <strong>eventual consistency</strong>: client ghi xong nhưng đọc lại ngay lập tức có thể vẫn thấy dữ liệu cũ, vì replication giữa các node là bất đồng bộ và có độ trễ.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> ghi dữ liệu mới (<code>PUT /profile</code>) vào <strong>Primary DB</strong>. Primary trả về ACK ngay lập tức, không đợi replicate xong.</li>
+      <li>Primary <strong>replicate bất đồng bộ</strong> dữ liệu mới sang <strong>Replica 1</strong> và <strong>Replica 2</strong>.</li>
+      <li>Replica 1 nhận kịp bản replicate → client đọc từ Replica 1 <strong>sau đó</strong> sẽ thấy dữ liệu mới.</li>
+      <li>Replica 2 nhận trễ hơn (còn đang lag) → nếu client đọc từ Replica 2 <strong>ngay sau khi ghi</strong>, sẽ nhận lại dữ liệu cũ.</li>
+    </ol>
+    <p class="callout">Đây gọi là <strong>read-your-writes anomaly</strong>: ghi thành công rồi, nhưng đọc ngay sau đó lại không thấy chính thay đổi mình vừa tạo ra — do độ trễ replicate, không phải bug logic.</p>
+
+    <h2>Nguyên nhân</h2>
+    <ul>
+      <li>Replication bất đồng bộ là một <strong>đánh đổi có chủ đích</strong>: đổi lấy write latency thấp hơn và availability cao hơn cho hệ thống</li>
+      <li>Mỗi replica sẽ hội tụ về cùng một giá trị sau một khoảng thời gian (đó là ý nghĩa của "eventually consistent"), nhưng trong khoảng trễ đó các replica có thể trả về dữ liệu khác nhau</li>
+      <li>Vấn đề càng dễ gặp khi có load balancer định tuyến các request đọc/ghi liên tiếp của cùng một client tới các replica khác nhau</li>
+    </ul>
+
+    <h2>Cách đảm bảo Read-Your-Writes</h2>
+    <ul>
+      <li><strong>Sticky session</strong>: sau khi client ghi, định tuyến các lần đọc tiếp theo của chính client đó về Primary trong một khoảng thời gian</li>
+      <li><strong>Đọc từ Primary</strong> cho chính request theo sau ngay một lần ghi, chỉ chuyển sang đọc replica sau khi chắc chắn đã hết độ trễ replicate</li>
+      <li><strong>Session/causal consistency</strong>: server ghi nhớ version dữ liệu client vừa ghi, replica chỉ trả lời khi đã bắt kịp version đó</li>
+      <li><strong>Versioned reads</strong>: client gửi kèm version đã ghi, replica từ chối/hoãn trả lời nếu chưa bắt kịp</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/eventual-consistency/spec.dataflow.json" target="_blank" rel="noopener">spec.dataflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate dataflow path/to/spec.dataflow.json --quality showcase --json
+node bin/archify.mjs deliver dataflow path/to/spec.dataflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../">← Quay lại danh mục</a>
+  </div>
+</footer>
+</body>
+</html>

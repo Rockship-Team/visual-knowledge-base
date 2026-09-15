@@ -13,9 +13,17 @@ Mỗi chủ đề nằm trong `diagrams/<slug>/` gồm:
 
 ## Danh mục
 
+### Concurrency & Distributed Systems
+
 | Chủ đề | Loại | Link |
 |---|---|---|
 | Race Condition: Lost Update | sequence | [diagrams/race-condition-lost-update](./diagrams/race-condition-lost-update) |
+| Deadlock: Circular Wait giữa 2 Transaction | sequence | [diagrams/deadlock-circular-wait](./diagrams/deadlock-circular-wait) |
+| Distributed Lock | sequence | [diagrams/distributed-lock](./diagrams/distributed-lock) |
+| Idempotency Key: an toàn khi retry API | sequence | [diagrams/idempotency-key](./diagrams/idempotency-key) |
+| CAP Theorem: Consistency vs Availability khi Network Partition | workflow | [diagrams/cap-theorem](./diagrams/cap-theorem) |
+| Leader Election: Raft Consensus cơ bản | lifecycle | [diagrams/leader-election-raft](./diagrams/leader-election-raft) |
+| Eventual Consistency: Read-Your-Writes Anomaly | dataflow | [diagrams/eventual-consistency](./diagrams/eventual-consistency) |
 
 ## Đóng góp thêm chủ đề
 

@@ -16,7 +16,7 @@
         <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Đóng góp</a>
       </nav>
     </div>
-    <p class="tagline">Kho tổng hợp kiến thức kỹ thuật dưới dạng diagram trực quan (architecture, sequence, workflow, dataflow, lifecycle), dựng bằng <a href="https://github.com/tt-a1i/archify" target="_blank" rel="noopener">archify</a>.</p>
+    <p class="tagline">Kho tổng hợp kiến thức backend dưới dạng diagram trực quan (architecture, sequence, workflow, dataflow, lifecycle) để dev công ty tự học, dựng bằng <a href="https://github.com/tt-a1i/archify" target="_blank" rel="noopener">archify</a>.</p>
   </div>
 </header>
 
@@ -25,21 +25,112 @@
     <input id="catalog-search" class="search-input" type="search" placeholder="Tìm theo tên, mô tả, tag…" aria-label="Tìm chủ đề">
     <div id="catalog-pills" class="pills"></div>
   </div>
+  <nav id="category-nav" class="category-nav" aria-label="Nhảy tới danh mục"></nav>
 
-  <div id="catalog-grid" class="grid">
-    <a class="card"
-       href="diagrams/race-condition-lost-update/"
-       data-type="sequence"
-       data-search="race condition lost update deadlock concurrency distributed-systems database khoa lock">
-      <h2>Race Condition: Lost Update</h2>
-      <p class="desc">Hai client cùng đọc-tính-ghi số dư tài khoản mà không đồng bộ, khiến một lần cập nhật bị mất.</p>
-      <div class="meta-row">
-        <span class="badge">sequence</span>
-        <span class="tag">concurrency</span>
-        <span class="tag">database</span>
-      </div>
-    </a>
-  </div>
+  <section class="category-section" id="concurrency-distributed-systems" data-category-label="Concurrency & Distributed Systems">
+    <div class="category-head">
+      <h2 class="category-title">Concurrency &amp; Distributed Systems</h2>
+    </div>
+    <p class="category-desc">Race condition, deadlock, distributed lock, idempotency, consensus, CAP theorem, eventual consistency.</p>
+    <div class="grid">
+      <a class="card"
+         href="diagrams/race-condition-lost-update/"
+         data-type="sequence"
+         data-search="race condition lost update concurrency distributed-systems database khoa lock">
+        <h2>Race Condition: Lost Update</h2>
+        <p class="desc">Hai client cùng đọc-tính-ghi số dư tài khoản mà không đồng bộ, khiến một lần cập nhật bị mất.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">concurrency</span>
+          <span class="tag">database</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/deadlock-circular-wait/"
+         data-type="sequence"
+         data-search="deadlock circular wait concurrency database locking khoa transaction">
+        <h2>Deadlock: Circular Wait giữa 2 Transaction</h2>
+        <p class="desc">Hai transaction cùng giữ một khóa mà bên kia đang cần, tạo vòng chờ khép kín cho tới khi deadlock detector abort một bên.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">concurrency</span>
+          <span class="tag">database</span>
+          <span class="tag">locking</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/distributed-lock/"
+         data-type="sequence"
+         data-search="distributed lock redis nx px token concurrency distributed-systems critical section">
+        <h2>Distributed Lock</h2>
+        <p class="desc">Dùng Redis lock (SET NX PX + token) để đảm bảo chỉ một instance chạy critical section tại một thời điểm — cách khắc phục đúng cho Lost Update.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">concurrency</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">redis</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/idempotency-key/"
+         data-type="sequence"
+         data-search="idempotency key retry api design reliability payment charge distributed-systems">
+        <h2>Idempotency Key: an toàn khi retry API</h2>
+        <p class="desc">Client retry một request bị timeout với cùng Idempotency-Key, server phát hiện và trả kết quả cũ thay vì charge thẻ hai lần.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">api-design</span>
+          <span class="tag">reliability</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/cap-theorem/"
+         data-type="workflow"
+         data-search="cap theorem consistency availability partition tolerance distributed-systems trade-off replication">
+        <h2>CAP Theorem: Consistency vs Availability khi Network Partition</h2>
+        <p class="desc">Khi network partition xảy ra giữa các node, hệ thống phải chọn giữa giữ Consistency hay Availability.</p>
+        <div class="meta-row">
+          <span class="badge">workflow</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">trade-off</span>
+          <span class="tag">replication</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/eventual-consistency/"
+         data-type="dataflow"
+         data-search="eventual consistency read your writes anomaly replication replica lag distributed-systems">
+        <h2>Eventual Consistency: Read-Your-Writes Anomaly</h2>
+        <p class="desc">Client ghi xong nhưng đọc lại ngay lập tức từ một replica chưa kịp cập nhật sẽ thấy dữ liệu cũ.</p>
+        <div class="meta-row">
+          <span class="badge">dataflow</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">replication</span>
+          <span class="tag">consistency</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/leader-election-raft/"
+         data-type="lifecycle"
+         data-search="leader election raft consensus quorum split vote follower candidate distributed-systems">
+        <h2>Leader Election: Raft Consensus cơ bản</h2>
+        <p class="desc">State machine Follower → Candidate → Leader trong Raft, minh họa quorum, split vote retry, và step-down khi phát hiện term cao hơn.</p>
+        <div class="meta-row">
+          <span class="badge">lifecycle</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">consensus</span>
+          <span class="tag">raft</span>
+        </div>
+      </a>
+    </div>
+  </section>
 
   <p id="catalog-empty" class="empty" hidden>Không tìm thấy chủ đề nào khớp.</p>
 </main>

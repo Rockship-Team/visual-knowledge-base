@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Deadlock: Circular Wait giua 2 transaction",
+    "output": "deadlock-circular-wait.html",
+    "viewBox": [900, 620],
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "txnA", "type": "external", "label": "Transaction A", "sublabel": "client session" },
+    { "id": "txnB", "type": "external", "label": "Transaction B", "sublabel": "client session" },
+    { "id": "db", "type": "database", "label": "Database", "sublabel": "lock manager" }
+  ],
+  "segments": [
+    { "from": 145, "to": 265, "label": "A va B khoa cac dong khac nhau" },
+    { "from": 265, "to": 385, "label": "Circular wait: moi ben cho khoa cua nhau" },
+    { "from": 385, "to": 445, "label": "Deadlock detector chon nan nhan, rollback B" },
+    { "from": 445, "to": 505, "label": "A tiep tuc va commit" }
+  ],
+  "messages": [
+    { "id": "a-lock-row1", "from": "txnA", "to": "db", "y": 160, "label": "LOCK Row 1", "variant": "default" },
+    { "id": "a-lock-row1-ok", "from": "db", "to": "txnA", "y": 190, "label": "OK (khoa duoc cap)", "variant": "return" },
+    { "id": "b-lock-row2", "from": "txnB", "to": "db", "y": 220, "label": "LOCK Row 2", "variant": "default" },
+    { "id": "b-lock-row2-ok", "from": "db", "to": "txnB", "y": 250, "label": "OK (khoa duoc cap)", "variant": "return" },
+    { "id": "a-lock-row2-req", "from": "txnA", "to": "db", "y": 280, "label": "LOCK Row 2 (yeu cau)", "variant": "default" },
+    { "id": "a-waiting", "from": "db", "to": "txnA", "y": 310, "label": "WAITING... cho B nha khoa", "variant": "dashed" },
+    { "id": "b-lock-row1-req", "from": "txnB", "to": "db", "y": 340, "label": "LOCK Row 1 (yeu cau)", "variant": "default" },
+    { "id": "b-waiting", "from": "db", "to": "txnB", "y": 370, "label": "WAITING... deadlock!", "variant": "dashed" },
+    { "id": "deadlock-abort", "from": "db", "to": "txnB", "y": 400, "label": "DEADLOCK: ABORT B", "variant": "emphasis" },
+    { "id": "a-lock-row2-ok", "from": "db", "to": "txnA", "y": 430, "label": "LOCK Row 2 OK (B da rollback)", "variant": "return" },
+    { "id": "a-commit", "from": "txnA", "to": "db", "y": 460, "label": "COMMIT", "variant": "default" },
+    { "id": "a-commit-ok", "from": "db", "to": "txnA", "y": 490, "label": "OK", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "db", "from": 160, "to": 495, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Circular wait xay ra o dau",
+      "items": [
+        "A giu khoa Row 1, roi xin khoa Row 2",
+        "B giu khoa Row 2, roi xin khoa Row 1",
+        "Ca hai cung bi block: moi ben cho khoa ma ben kia dang giu -> vong cho vong tron"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Nguyen nhan goc re",
+      "items": [
+        "Khong co thu tu khoa nhat quan (lock ordering) giua cac transaction",
+        "Thoa man du 4 dieu kien Coffman: mutual exclusion, hold-and-wait, no preemption, circular wait",
+        "Transaction chay cang lau, cang nhieu row bi khoa thi xac suat deadlock cang cao"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Cach khac phuc",
+      "items": [
+        "Ap dat thu tu khoa toan cuc giong nhau cho moi transaction (vi du luon khoa theo id tang dan)",
+        "Giu transaction ngan, commit som, giam thoi gian giu khoa",
+        "Dung SELECT ... FOR UPDATE NOWAIT hoac SKIP LOCKED de khong bi block vo han",
+        "De DB tu phat hien deadlock, abort victim va retry o tang ung dung"
+      ]
+    }
+  ]
+}

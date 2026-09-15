@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Distributed Lock — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/distributed-lock" target="_blank" rel="noopener">Xem trên GitHub</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Distributed Lock</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">concurrency</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">redis</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
+      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+    </div>
+    <iframe src="diagram.html" title="Distributed lock sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose">
+    <h2>Tóm tắt</h2>
+    <p>Distributed lock (dùng Redis <code>SET NX PX</code>) là cách khắc phục đúng cho race condition kiểu <a href="../race-condition-lost-update/">Lost Update</a>: đảm bảo chỉ một instance được chạy critical section tại một thời điểm.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Instance A</strong> gửi <code>SET lock token=A NX PX 5000</code> tới Redis → thành công, giữ khóa</li>
+      <li><strong>Instance B</strong> cũng thử <code>SET lock token=B NX</code> → Redis từ chối vì key đã tồn tại → B retry (backoff)</li>
+      <li>A chạy critical section (<code>UPDATE balance = balance + 50</code>), xong thì giải phóng khóa bằng script chỉ xóa <strong>nếu token còn khớp token=A</strong></li>
+      <li>B retry lần nữa, lần này acquire thành công → B mới được chạy critical section của mình</li>
+    </ol>
+    <p class="callout">Kết quả: hai instance không bao giờ chạy critical section cùng lúc — không còn đọc-tính-ghi chồng chéo.</p>
+
+    <h2>Yêu cầu đúng của distributed lock</h2>
+    <ul>
+      <li><strong>TTL/PX bắt buộc</strong>: nếu instance giữ khóa bị crash, khóa tự động hết hạn thay vì khóa vĩnh viễn (deadlock)</li>
+      <li><strong>Token duy nhất</strong> cho mỗi lần acquire: chỉ xóa khóa nếu token còn khớp, tránh xóa nhầm khóa của instance khác sau khi TTL của mình đã hết hạn</li>
+      <li><strong>Atomic check-and-delete</strong>: thao tác "kiểm tra token rồi xóa" phải chạy trong một Lua script, nếu không tự nó lại thành một race condition mới</li>
+    </ul>
+
+    <h2>Hạn chế cần biết</h2>
+    <ul>
+      <li>Redlock (dùng nhiều Redis node để tăng độ tin cậy) vẫn bị tranh cãi về tính an toàn khi đồng hồ hệ thống hoặc network không lý tưởng (Martin Kleppmann, "How to do distributed locking", 2016)</li>
+      <li>Với yêu cầu correctness cao (ví dụ tài chính), nên kết hợp thêm <strong>fencing token</strong> ở phía tài nguyên được bảo vệ, không chỉ dựa vào lock</li>
+      <li>Với một Redis instance đơn, đây vẫn là giải pháp đơn giản và đủ dùng cho phần lớn use case thực tế</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/distributed-lock/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../">← Quay lại danh mục</a>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Distributed Lock: khoa dung de tranh Race Condition",
+    "output": "distributed-lock.html",
+    "viewBox": [1050, 780],
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "instanceA", "type": "external", "label": "Instance A", "sublabel": "worker node" },
+    { "id": "instanceB", "type": "external", "label": "Instance B", "sublabel": "worker node" },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "lock store" },
+    { "id": "db", "type": "database", "label": "Database", "sublabel": "balance = 100" }
+  ],
+  "segments": [
+    { "from": 145, "to": 205, "label": "A gianh khoa" },
+    { "from": 205, "to": 325, "label": "B bi tu choi, retry" },
+    { "from": 325, "to": 445, "label": "A chay critical section, tra khoa" },
+    { "from": 445, "to": 505, "label": "B retry thanh cong" },
+    { "from": 505, "to": 625, "label": "B chay critical section, tra khoa" }
+  ],
+  "messages": [
+    { "id": "a-acquire-req", "from": "instanceA", "to": "redis", "y": 160, "label": "SET lock NX PX 5000 (token=A)", "variant": "default" },
+    { "id": "a-acquire-ok", "from": "redis", "to": "instanceA", "y": 190, "label": "OK (lock acquired)", "variant": "return" },
+    { "id": "b-acquire-req", "from": "instanceB", "to": "redis", "y": 220, "label": "SET lock NX PX 5000 (token=B)", "variant": "default" },
+    { "id": "b-acquire-fail", "from": "redis", "to": "instanceB", "y": 250, "label": "nil (key da ton tai)", "variant": "return" },
+    { "id": "b-retry1-req", "from": "instanceB", "to": "redis", "y": 280, "label": "retry: SET lock NX (token=B)", "variant": "dashed" },
+    { "id": "b-retry1-fail", "from": "redis", "to": "instanceB", "y": 310, "label": "nil (van con khoa)", "variant": "dashed" },
+    { "id": "a-write-req", "from": "instanceA", "to": "db", "y": 340, "label": "UPDATE balance = balance + 50", "variant": "emphasis" },
+    { "id": "a-write-ok", "from": "db", "to": "instanceA", "y": 370, "label": "OK", "variant": "return" },
+    { "id": "a-release-req", "from": "instanceA", "to": "redis", "y": 400, "label": "DEL lock IF token = A (Lua script)", "variant": "default" },
+    { "id": "a-release-ok", "from": "redis", "to": "instanceA", "y": 430, "label": "OK (lock released)", "variant": "return" },
+    { "id": "b-retry2-req", "from": "instanceB", "to": "redis", "y": 460, "label": "retry: SET lock NX PX 5000 (token=B)", "variant": "default" },
+    { "id": "b-retry2-ok", "from": "redis", "to": "instanceB", "y": 490, "label": "OK (lock acquired)", "variant": "return" },
+    { "id": "b-write-req", "from": "instanceB", "to": "db", "y": 520, "label": "UPDATE balance = balance + 50", "variant": "emphasis" },
+    { "id": "b-write-ok", "from": "db", "to": "instanceB", "y": 550, "label": "OK", "variant": "return" },
+    { "id": "b-release-req", "from": "instanceB", "to": "redis", "y": 580, "label": "DEL lock IF token = B", "variant": "default" },
+    { "id": "b-release-ok", "from": "redis", "to": "instanceB", "y": 610, "label": "OK (lock released)", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "redis", "from": 165, "to": 195, "type": "database" },
+    { "participant": "redis", "from": 225, "to": 255, "type": "database" },
+    { "participant": "redis", "from": 285, "to": 315, "type": "database" },
+    { "participant": "db", "from": 345, "to": 375, "type": "database" },
+    { "participant": "redis", "from": 405, "to": 435, "type": "database" },
+    { "participant": "redis", "from": 465, "to": 495, "type": "database" },
+    { "participant": "db", "from": 525, "to": 555, "type": "database" },
+    { "participant": "redis", "from": 585, "to": 615, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Race condition duoc ngan chan the nao",
+      "items": [
+        "Ca 2 instance cung muon chay critical section, nhung chi 1 duoc cap lock tai 1 thoi diem",
+        "Instance con lai bi Redis tu choi (NX that bai) va phai retry",
+        "Sau khi A release lock, B moi duoc cap va tiep tuc — khong con doc-tinh-ghi chong cheo"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Yeu cau dung cua distributed lock",
+      "items": [
+        "TTL/PX bat buoc: neu instance giu lock bi crash, lock tu dong het han thay vi khoa vinh vien",
+        "Token duy nhat cho moi lan acquire: chi xoa lock neu token con khop, tranh xoa nham lock cua instance khac sau khi TTL het han",
+        "Thao tac SET NX va DEL-neu-token-khop can atomic (Lua script) de tranh race ngay trong chinh logic lock"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Han che can biet",
+      "items": [
+        "Redlock (nhieu Redis node) van bi tranh cai ve tinh an toan khi clock/network khong ly tuong",
+        "Voi yeu cau correctness cao, nen ket hop them fencing token o phia resource duoc bao ve",
+        "Voi single Redis instance, day la giai phap don gian va du dung cho da so use case thuc te"
+      ]
+    }
+  ]
+}

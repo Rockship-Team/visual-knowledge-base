@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deadlock: Circular Wait — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/deadlock-circular-wait" target="_blank" rel="noopener">Xem trên GitHub</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Deadlock: Circular Wait giữa 2 Transaction</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">concurrency</span>
+    <span class="tag">database</span>
+    <span class="tag">locking</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
+      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+    </div>
+    <iframe src="diagram.html" title="Deadlock circular wait sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose">
+    <h2>Tóm tắt</h2>
+    <p>Minh họa deadlock kinh điển giữa hai transaction database: mỗi transaction giữ một khóa mà transaction kia đang cần, tạo thành <strong>vòng chờ (circular wait)</strong> và cả hai bị block vĩnh viễn nếu không có deadlock detector can thiệp.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Transaction A</strong> khóa <code>Row 1</code> thành công</li>
+      <li><strong>Transaction B</strong> khóa <code>Row 2</code> thành công</li>
+      <li>A xin khóa <code>Row 2</code> → bị block vì B đang giữ</li>
+      <li>B xin khóa <code>Row 1</code> → bị block vì A đang giữ → <strong>vòng chờ khép kín</strong></li>
+      <li>Deadlock detector của DB phát hiện chu trình, chọn B làm "nạn nhân", abort và rollback B, giải phóng khóa của B</li>
+      <li>A nhận được khóa <code>Row 2</code>, tiếp tục và commit bình thường</li>
+    </ol>
+    <p class="callout">Kết quả: Transaction B bị lỗi (phải retry ở tầng ứng dụng), Transaction A hoàn tất — không có transaction nào chờ mãi mãi nhờ deadlock detector.</p>
+
+    <h2>Nguyên nhân gốc rễ</h2>
+    <ul>
+      <li>Không có thứ tự khóa nhất quán (lock ordering) giữa các transaction — mỗi transaction khóa các row theo thứ tự khác nhau</li>
+      <li>Thỏa mãn đủ 4 điều kiện Coffman: mutual exclusion, hold-and-wait, no preemption, circular wait</li>
+      <li>Transaction chạy càng lâu, càng khóa nhiều row thì xác suất xảy ra deadlock càng cao</li>
+    </ul>
+
+    <h2>Cách khắc phục</h2>
+    <ul>
+      <li><strong>Áp đặt thứ tự khóa toàn cục</strong> giống nhau cho mọi transaction (ví dụ luôn khóa theo id tăng dần) — phá vỡ điều kiện circular wait</li>
+      <li><strong>Giữ transaction ngắn</strong>, commit sớm để giảm thời gian giữ khóa</li>
+      <li><code>SELECT ... FOR UPDATE NOWAIT</code> hoặc <code>SKIP LOCKED</code> để không bị block vô hạn, thất bại nhanh thay vì chờ</li>
+      <li>Để DB tự phát hiện deadlock, abort transaction nạn nhân và retry ở tầng ứng dụng</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/deadlock-circular-wait/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../">← Quay lại danh mục</a>
+  </div>
+</footer>
+</body>
+</html>

@@ -138,6 +138,46 @@ a { color: var(--accent); }
   border-color: var(--pill-active-bg);
 }
 
+/* category quick-nav */
+.category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+.category-nav a {
+  font-size: 0.82rem;
+  text-decoration: none;
+  color: var(--pill-text);
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+}
+.category-nav a:hover { color: var(--accent); border-color: var(--accent); }
+
+/* category sections */
+.category-section {
+  margin-bottom: 2.5rem;
+  scroll-margin-top: 1rem;
+}
+.category-section .category-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+.category-title {
+  font-size: 1.15rem;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.category-desc {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
 /* catalog grid */
 .grid {
   display: grid;

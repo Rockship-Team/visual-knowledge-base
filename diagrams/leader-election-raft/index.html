@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Leader Election: Raft Consensus — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/leader-election-raft" target="_blank" rel="noopener">Xem trên GitHub</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Leader Election: Raft Consensus cơ bản</h1>
+  <div class="topic-meta">
+    <span class="badge">lifecycle</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">consensus</span>
+    <span class="tag">raft</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
+      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+    </div>
+    <iframe src="diagram.html" title="Raft leader election lifecycle diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose">
+    <h2>Tóm tắt</h2>
+    <p>Trong một hệ phân tán, nhiều node cần thống nhất chọn ra <strong>một leader duy nhất</strong> để tránh xung đột khi ghi dữ liệu. Raft giải quyết bài toán này bằng một state machine đơn giản: <strong>Follower → Candidate → Leader</strong>, dựa trên bỏ phiếu đa số (quorum).</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Follower</strong> là trạng thái mặc định: node thụ động chờ heartbeat từ leader hiện tại</li>
+      <li>Nếu hết <strong>election timeout</strong> mà không nhận được heartbeat nào, Follower tự chuyển thành <strong>Candidate</strong>: tăng term, tự bỏ phiếu cho mình, gửi yêu cầu xin phiếu tới các node khác</li>
+      <li>Nếu Candidate <strong>thắng đa số phiếu (quorum)</strong>, nó trở thành <strong>Leader</strong> và bắt đầu gửi heartbeat định kỳ để giữ quyền</li>
+      <li>Nếu xảy ra <strong>split vote</strong> (chia phiếu, không ai đạt đa số), Candidate quay lại Follower, chờ một election timeout ngẫu nhiên khác rồi thử lại</li>
+      <li>Nếu Leader phát hiện một node khác có <strong>term cao hơn</strong> (ví dụ sau khi mạng phân vùng được nối lại), nó tự <strong>step down</strong> về Follower ngay lập tức</li>
+    </ol>
+    <p class="callout">Chỉ có thể có tối đa <strong>một Leader hợp lệ mỗi term</strong>, vì việc thắng cử đòi hỏi đa số phiếu — đây chính là cơ chế chống split-brain của Raft.</p>
+
+    <h2>Vì sao cần random timeout</h2>
+    <ul>
+      <li>Nếu mọi node dùng cùng một election timeout cố định, nhiều node có thể cùng trở thành Candidate một lượt và liên tục chia phiếu nhau, không bao giờ hội tụ</li>
+      <li>Raft dùng timeout ngẫu nhiên trong một khoảng cho mỗi node, nên gần như luôn có một Candidate bắt đầu bầu cử trước, kịp xin đủ phiếu trước khi node khác kịp timeout</li>
+    </ul>
+
+    <h2>Vai trò của heartbeat</h2>
+    <ul>
+      <li>Leader gửi heartbeat (AppendEntries rỗng) định kỳ tới mọi Follower</li>
+      <li>Chỉ cần Follower còn nhận heartbeat đều đặn, nó sẽ không timeout và không khởi động election mới</li>
+      <li>Heartbeat dừng lại (leader chết, mất mạng...) là tín hiệu duy nhất khiến cluster biết cần bầu lại</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/leader-election-raft/spec.lifecycle.json" target="_blank" rel="noopener">spec.lifecycle.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate lifecycle path/to/spec.lifecycle.json --quality showcase --json
+node bin/archify.mjs deliver lifecycle path/to/spec.lifecycle.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../">← Quay lại danh mục</a>
+  </div>
+</footer>
+</body>
+</html>
