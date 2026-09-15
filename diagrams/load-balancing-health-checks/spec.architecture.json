@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Load Balancing: Routing Around Unhealthy Instances",
+    "output": "diagram.html",
+    "viewBox": [820, 640],
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "client", "type": "external", "label": "Client", "sublabel": "browser / mobile", "pos": [40, 300], "size": [130, 60] },
+    { "id": "lb", "type": "backend", "label": "Load Balancer", "sublabel": "round robin", "pos": [280, 300], "size": [140, 60] },
+    { "id": "instanceA", "type": "backend", "label": "Instance A", "sublabel": "healthy", "pos": [560, 140], "size": [140, 60] },
+    { "id": "instanceB", "type": "backend", "label": "Instance B", "sublabel": "healthy", "pos": [560, 300], "size": [140, 60], "tag": "health check: failing" },
+    { "id": "instanceC", "type": "backend", "label": "Instance C", "sublabel": "healthy", "pos": [560, 460], "size": [140, 60] }
+  ],
+  "connections": [
+    { "id": "client-to-lb", "from": "client", "to": "lb", "label": "requests", "variant": "emphasis" },
+    { "id": "lb-to-a", "from": "lb", "to": "instanceA", "label": "routed traffic", "fromSide": "right", "toSide": "left" },
+    { "id": "lb-to-c", "from": "lb", "to": "instanceC", "label": "routed traffic", "fromSide": "right", "toSide": "left" },
+    { "id": "lb-to-b-healthcheck", "from": "lb", "to": "instanceB", "label": "health check: failing", "variant": "dashed", "fromSide": "right", "toSide": "left", "labelAt": [580, 296] }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Healthy Path",
+      "items": [
+        "Instance A and Instance C receive live client traffic",
+        "Both are passing their health checks the same way Instance B is being probed"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Excluded Instance",
+      "items": [
+        "Instance B is failing its health check and is silently excluded from routing",
+        "No 'routed traffic' edge reaches it — only the health probe does",
+        "Clients never see the failure; they're just served by A and C instead"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Recovery",
+      "items": [
+        "Once Instance B passes health checks again, it's usually re-added gradually (slow start)",
+        "This avoids overwhelming a just-recovered instance with its full traffic share instantly"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TCP and TLS Handshake: What Happens Before Your First Byte — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/tcp-tls-handshake" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">TCP and TLS Handshake: What Happens Before Your First Byte</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">networking</span>
+    <span class="tag">tls</span>
+    <span class="tag">performance</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="TCP and TLS handshake sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Before a single byte of an HTTPS request or response can flow, the client and server first negotiate a reliable connection (<strong>TCP</strong>) and then a secure, authenticated, encrypted channel (<strong>TLS</strong>) — both are round trips that add latency before "your" data ever moves.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Literally every fresh HTTPS connection starts with this exchange — the practical question for backend developers isn't how to avoid it, it's how to minimize how <em>often</em> it happens, by reusing connections instead of opening a new one per request.</p>
+    <p><strong>Where to spot it:</strong> Time-to-first-byte (TTFB) latency breakdowns in profiling tools, HTTP client connection-pool/keep-alive settings, TLS termination configuration on load balancers and reverse proxies, and "why is the very first request always slower" investigations.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>SYN (seq=x)</code></li>
+      <li><strong>Server</strong> → <strong>Client</strong>: <code>SYN-ACK (seq=y, ack=x+1)</code></li>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>ACK (ack=y+1)</code> — TCP connection established</li>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>ClientHello</code> (supported ciphers, random)</li>
+      <li><strong>Server</strong> → <strong>Client</strong>: <code>ServerHello + Certificate</code> (chosen cipher, random, cert)</li>
+      <li><strong>Client</strong> verifies the certificate, then sends key-exchange material so both sides can derive a shared symmetric session key</li>
+      <li><strong>Server</strong> → <strong>Client</strong>: <code>Finished</code> (encrypted handshake confirmation)</li>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>Finished</code> (confirms)</li>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>Encrypted: GET /api/data</code></li>
+      <li><strong>Server</strong> → <strong>Client</strong>: <code>Encrypted: 200 JSON</code></li>
+    </ol>
+    <p class="callout">3 round trips happened — 1 for TCP, roughly 2 for a classic TLS 1.2-style handshake — before the actual API request in step 9 was even sent.</p>
+
+    <h2>What Each Phase Actually Buys You</h2>
+    <ul>
+      <li>The <strong>TCP handshake</strong> establishes a reliable, ordered, two-way byte stream and synchronizes sequence numbers so lost or out-of-order packets can be detected and retransmitted</li>
+      <li>The <strong>TLS handshake</strong> authenticates the server's identity via its certificate (so the client knows it's really talking to the right server) and negotiates a shared symmetric session key so all following traffic is encrypted and tamper-evident</li>
+      <li>Neither side needs to exchange a shared secret in advance — the handshake derives one on the fly</li>
+    </ul>
+
+    <h2>Reducing Handshake Overhead</h2>
+    <ul>
+      <li><strong>TLS 1.3</strong> collapses the handshake to a single round trip (1-RTT) versus TLS 1.2's roughly two round trips shown here, and supports <strong>0-RTT resumption</strong> for a client reconnecting to a server it already has a session with</li>
+      <li><strong>HTTP keep-alive and connection pooling</strong> reuse an already-established connection across many requests instead of paying the handshake cost every time</li>
+      <li><strong>HTTP/2</strong> multiplexes many requests over one connection for the same reason</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/tcp-tls-handshake/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Trước khi một byte dữ liệu HTTPS nào được gửi đi, client và server phải đàm phán một kết nối tin cậy (<strong>TCP</strong>) rồi tới một kênh bảo mật, có xác thực, mã hóa (<strong>TLS</strong>) — cả hai đều là các round trip cộng thêm độ trễ trước khi dữ liệu "thật sự" của bạn được gửi.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Đúng nghĩa là mọi kết nối HTTPS mới đều bắt đầu bằng chuỗi trao đổi này — câu hỏi thực tế với backend developer không phải là làm sao để tránh nó, mà là làm sao giảm <em>tần suất</em> nó xảy ra, bằng cách tái sử dụng kết nối thay vì mở mới cho mỗi request.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Phân tích độ trễ time-to-first-byte (TTFB) trong các công cụ profiling, cấu hình connection-pool/keep-alive của HTTP client, cấu hình TLS termination trên load balancer và reverse proxy, và các buổi điều tra kiểu "tại sao request đầu tiên luôn chậm hơn".</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>SYN (seq=x)</code></li>
+      <li><strong>Server</strong> → <strong>Client</strong>: <code>SYN-ACK (seq=y, ack=x+1)</code></li>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>ACK (ack=y+1)</code> — kết nối TCP đã thiết lập</li>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>ClientHello</code> (danh sách cipher hỗ trợ, random)</li>
+      <li><strong>Server</strong> → <strong>Client</strong>: <code>ServerHello + Certificate</code> (cipher được chọn, random, chứng chỉ)</li>
+      <li><strong>Client</strong> xác thực chứng chỉ, rồi gửi dữ liệu trao đổi khóa để cả hai bên tính ra cùng một session key đối xứng</li>
+      <li><strong>Server</strong> → <strong>Client</strong>: <code>Finished</code> (xác nhận handshake đã mã hóa)</li>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>Finished</code> (xác nhận lại)</li>
+      <li><strong>Client</strong> → <strong>Server</strong>: <code>Encrypted: GET /api/data</code></li>
+      <li><strong>Server</strong> → <strong>Client</strong>: <code>Encrypted: 200 JSON</code></li>
+    </ol>
+    <p class="callout">3 round trip đã diễn ra — 1 cho TCP, khoảng 2 cho TLS handshake kiểu TLS 1.2 cổ điển — trước khi request API thật sự ở bước 9 được gửi đi.</p>
+
+    <h2>Mỗi Giai Đoạn Mang Lại Gì</h2>
+    <ul>
+      <li><strong>TCP handshake</strong> thiết lập một luồng byte hai chiều, tin cậy, đúng thứ tự, và đồng bộ sequence number để phát hiện và truyền lại gói tin bị mất hoặc sai thứ tự</li>
+      <li><strong>TLS handshake</strong> xác thực danh tính server qua chứng chỉ (để client chắc chắn đang nói chuyện đúng với server thật), và thỏa thuận một session key đối xứng dùng chung để toàn bộ traffic sau đó được mã hóa và chống giả mạo</li>
+      <li>Cả hai bên không cần trao đổi trước một secret dùng chung — handshake tự tính ra secret đó ngay tại chỗ</li>
+    </ul>
+
+    <h2>Giảm Chi Phí Handshake</h2>
+    <ul>
+      <li><strong>TLS 1.3</strong> rút gọn handshake xuống còn 1 round trip (1-RTT) so với khoảng 2 round trip của TLS 1.2 trong diagram này, và hỗ trợ <strong>0-RTT resumption</strong> khi client kết nối lại với server đã từng có session trước đó</li>
+      <li><strong>HTTP keep-alive và connection pooling</strong> tái sử dụng một kết nối đã thiết lập cho nhiều request, thay vì trả phí handshake mỗi lần</li>
+      <li><strong>HTTP/2</strong> ghép nhiều request chạy chung trên một kết nối vì cùng lý do đó</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/tcp-tls-handshake/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

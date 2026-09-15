@@ -33,6 +33,14 @@ Mỗi chủ đề nằm trong `diagrams/<slug>/` gồm:
 | The N+1 Query Problem | sequence | [diagrams/n-plus-one-query](./diagrams/n-plus-one-query) |
 | Database Indexing: Index Scan vs Full Table Scan | workflow | [diagrams/database-indexing-btree](./diagrams/database-indexing-btree) |
 
+### Networking & API
+
+| Chủ đề | Loại | Link |
+|---|---|---|
+| Rate Limiting: The Token Bucket Algorithm | sequence | [diagrams/rate-limiting-token-bucket](./diagrams/rate-limiting-token-bucket) |
+| Load Balancing: Routing Around Unhealthy Instances | architecture | [diagrams/load-balancing-health-checks](./diagrams/load-balancing-health-checks) |
+| TCP and TLS Handshake: What Happens Before Your First Byte | sequence | [diagrams/tcp-tls-handshake](./diagrams/tcp-tls-handshake) |
+
 ## Đóng góp thêm chủ đề
 
 Xem [CONTRIBUTING.md](./CONTRIBUTING.md).

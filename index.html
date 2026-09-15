@@ -205,6 +205,60 @@
     </div>
   </section>
 
+  <section class="category-section" id="networking-api" data-category-label="Networking & API">
+    <div class="category-head">
+      <h2 class="category-title">Networking &amp; API</h2>
+    </div>
+    <p class="category-desc" data-lang="en">Rate limiting, load balancing, TCP/TLS — the connection-level mechanics behind every request your service handles.</p>
+    <p class="category-desc" data-lang="vi" hidden>Rate limiting, load balancing, TCP/TLS — cơ chế tầng kết nối đứng sau mọi request mà service của bạn xử lý.</p>
+    <div class="grid">
+      <a class="card"
+         href="diagrams/rate-limiting-token-bucket/"
+         data-type="sequence"
+         data-search="rate limiting token bucket 429 too many requests api-design networking reliability burst refill">
+        <h2>Rate Limiting: The Token Bucket Algorithm</h2>
+        <p class="desc" data-lang="en">A client's burst of requests drains a token bucket and gets rejected with 429 — until it refills at a steady rate.</p>
+        <p class="desc" data-lang="vi" hidden>Một chuỗi request dồn dập của client làm cạn token bucket và bị từ chối với 429 — cho tới khi bucket được refill theo tốc độ cố định.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">api-design</span>
+          <span class="tag">networking</span>
+          <span class="tag">reliability</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/load-balancing-health-checks/"
+         data-type="architecture"
+         data-search="load balancing health check round robin least connections networking reliability scalability instance">
+        <h2>Load Balancing: Routing Around Unhealthy Instances</h2>
+        <p class="desc" data-lang="en">A load balancer keeps serving traffic by silently routing around any instance that's failing its health checks.</p>
+        <p class="desc" data-lang="vi" hidden>Load balancer vẫn phục vụ traffic bình thường bằng cách âm thầm định tuyến vòng qua bất kỳ instance nào đang fail health check.</p>
+        <div class="meta-row">
+          <span class="badge">architecture</span>
+          <span class="tag">networking</span>
+          <span class="tag">reliability</span>
+          <span class="tag">scalability</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/tcp-tls-handshake/"
+         data-type="sequence"
+         data-search="tcp tls handshake syn ack client hello certificate networking performance encryption">
+        <h2>TCP and TLS Handshake: What Happens Before Your First Byte</h2>
+        <p class="desc" data-lang="en">Every fresh HTTPS connection pays 3 round trips of TCP + TLS negotiation before your actual request even goes out.</p>
+        <p class="desc" data-lang="vi" hidden>Mỗi kết nối HTTPS mới đều tốn 3 round trip cho TCP + TLS negotiation trước khi request thật sự của bạn được gửi đi.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">networking</span>
+          <span class="tag">tls</span>
+          <span class="tag">performance</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
   <p id="catalog-empty" class="empty" hidden>
     <span data-lang="en">No matching topics found.</span>
     <span data-lang="vi" hidden>Không tìm thấy chủ đề nào khớp.</span>

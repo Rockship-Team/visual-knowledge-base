@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Rate Limiting: The Token Bucket Algorithm",
+    "output": "diagram.html",
+    "viewBox": [960, 620],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "client", "type": "external", "label": "Client", "sublabel": "API consumer" },
+    { "id": "limiter", "type": "backend", "label": "Rate Limiter", "sublabel": "token bucket" },
+    { "id": "api", "type": "backend", "label": "API Server" }
+  ],
+  "segments": [
+    { "from": 145, "to": 265, "label": "Within budget - allowed" },
+    { "from": 265, "to": 340, "label": "Burst exceeds bucket - rejected" },
+    { "from": 340, "to": 480, "label": "Bucket refills, then allowed again" }
+  ],
+  "messages": [
+    { "id": "req-a", "from": "client", "to": "limiter", "y": 160, "label": "Request A", "variant": "default" },
+    { "id": "fwd-a", "from": "limiter", "to": "api", "y": 190, "label": "forward request", "variant": "default" },
+    { "id": "resp-a", "from": "api", "to": "limiter", "y": 220, "label": "response", "variant": "return" },
+    { "id": "ok-a", "from": "limiter", "to": "client", "y": 250, "label": "200 OK", "variant": "return" },
+    { "id": "burst", "from": "client", "to": "limiter", "y": 280, "label": "burst of requests", "variant": "emphasis" },
+    { "id": "reject", "from": "limiter", "to": "client", "y": 310, "label": "429 Too Many Requests", "variant": "dashed" },
+    { "id": "req-b", "from": "client", "to": "limiter", "y": 370, "label": "Request B (bucket refilled)", "variant": "default" },
+    { "id": "fwd-b", "from": "limiter", "to": "api", "y": 400, "label": "forward request", "variant": "default" },
+    { "id": "resp-b", "from": "api", "to": "limiter", "y": 430, "label": "response", "variant": "return" },
+    { "id": "ok-b", "from": "limiter", "to": "client", "y": 460, "label": "200 OK", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "limiter", "from": 160, "to": 465, "type": "backend" },
+    { "participant": "api", "from": 195, "to": 225, "type": "backend" },
+    { "participant": "api", "from": 405, "to": 435, "type": "backend" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "The Rejected Burst Never Reaches the API",
+      "items": [
+        "Once the bucket is empty, the limiter returns 429 immediately",
+        "The API server never even sees the rejected requests",
+        "This is what protects backend capacity, not just client experience"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Two Parameters Define the Bucket",
+      "items": [
+        "Capacity: the maximum burst size a client can send instantly",
+        "Refill rate: the sustained long-term average rate the bucket settles to",
+        "Each request costs 1 token (or more, for weighted endpoints)"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Choosing Parameters Well",
+      "items": [
+        "Scope the bucket per-user, per-IP, or per-API-key, not one global bucket",
+        "Return a Retry-After header on 429 so clients back off correctly",
+        "Token bucket smooths bursts better than fixed/sliding-window counters"
+      ]
+    }
+  ]
+}

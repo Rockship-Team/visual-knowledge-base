@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Load Balancing: Routing Around Unhealthy Instances — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/load-balancing-health-checks" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Load Balancing: Routing Around Unhealthy Instances</h1>
+  <div class="topic-meta">
+    <span class="badge">architecture</span>
+    <span class="tag">networking</span>
+    <span class="tag">reliability</span>
+    <span class="tag">scalability</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Load balancing and health checks architecture diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>A <strong>load balancer</strong> distributes client traffic across multiple backend instances and continuously monitors their health, automatically routing around any instance that's failing so a single bad instance doesn't take down the whole service.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Any service running more than one instance behind a single entry point needs to keep serving traffic even when one instance crashes, hangs, or degrades.</p>
+    <p><strong>Where to spot it:</strong> Any horizontally-scaled deployment (Kubernetes Service/Ingress, a cloud load balancer, an nginx/HAProxy upstream pool), incidents where a single bad pod caused elevated error rates until it was drained from rotation, and API gateways routing around a downed dependency.</p>
+
+    <h2>Topology</h2>
+    <ol>
+      <li><strong>Client</strong> sends requests to the <strong>Load Balancer</strong></li>
+      <li>The Load Balancer routes traffic to <strong>Instance A</strong> and <strong>Instance C</strong> — both healthy</li>
+      <li>The Load Balancer also continuously health-checks every instance, including <strong>Instance B</strong></li>
+      <li>Instance B is currently failing its health check, so it receives <em>no</em> routed traffic — only the health probe still reaches it</li>
+    </ol>
+    <p class="callout">Instance B keeps failing health checks and is silently excluded from traffic — clients never see the failure, they're just served by A and C instead.</p>
+
+    <h2>Load Balancing Algorithms</h2>
+    <ul>
+      <li><strong>Round robin</strong>: cycle through instances in order</li>
+      <li><strong>Least connections</strong>: send to whichever instance currently has the fewest active connections — better when requests have very different costs</li>
+      <li><strong>Weighted round robin</strong>: send more traffic to more powerful instances</li>
+    </ul>
+    <p>"Load balancing" and "health checking" are two separate concerns that are usually bundled into the same component.</p>
+
+    <h2>Active vs Passive Health Checks</h2>
+    <ul>
+      <li><strong>Active health checks</strong>: the load balancer periodically calls a dedicated <code>/health</code> endpoint on each instance and removes it from rotation after N consecutive failures</li>
+      <li><strong>Passive health checks</strong>: the load balancer watches real traffic and marks an instance unhealthy after it returns too many errors or times out, without a dedicated probe</li>
+      <li>A recovered instance is normally re-added <strong>gradually</strong> (a "slow start") rather than getting its full traffic share instantly, to avoid overwhelming it right after recovery</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/load-balancing-health-checks/spec.architecture.json" target="_blank" rel="noopener">spec.architecture.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate architecture path/to/spec.architecture.json --quality showcase --json
+node bin/archify.mjs deliver architecture path/to/spec.architecture.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Một <strong>load balancer</strong> phân phối traffic của client tới nhiều backend instance và liên tục theo dõi sức khỏe của chúng, tự động định tuyến tránh instance nào đang lỗi để một instance hỏng không kéo sập cả dịch vụ.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất kỳ service nào chạy nhiều hơn một instance đằng sau một entry point duy nhất cần tiếp tục phục vụ traffic ngay cả khi một instance crash, treo, hoặc suy giảm hiệu năng.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Mọi deployment scale ngang (Kubernetes Service/Ingress, load balancer trên cloud, upstream pool của nginx/HAProxy), các incident mà một pod hỏng làm tăng error rate cho tới khi bị loại khỏi vòng xoay, và API gateway định tuyến tránh một dependency đang sập.</p>
+
+    <h2>Cấu Trúc</h2>
+    <ol>
+      <li><strong>Client</strong> gửi request tới <strong>Load Balancer</strong></li>
+      <li>Load Balancer định tuyến traffic tới <strong>Instance A</strong> và <strong>Instance C</strong> — cả hai đều khỏe mạnh</li>
+      <li>Load Balancer cũng liên tục health-check mọi instance, kể cả <strong>Instance B</strong></li>
+      <li>Instance B đang fail health check, nên nó <em>không</em> nhận traffic — chỉ còn health probe vẫn tới được nó</li>
+    </ol>
+    <p class="callout">Instance B liên tục fail health check và bị âm thầm loại khỏi traffic — client không bao giờ thấy lỗi, chỉ đơn giản là được A và C phục vụ thay thế.</p>
+
+    <h2>Các Thuật Toán Load Balancing</h2>
+    <ul>
+      <li><strong>Round robin</strong>: xoay vòng qua các instance theo thứ tự</li>
+      <li><strong>Least connections</strong>: gửi tới instance nào đang có ít connection đang hoạt động nhất — tốt hơn khi các request có chi phí rất khác nhau</li>
+      <li><strong>Weighted round robin</strong>: gửi nhiều traffic hơn cho instance mạnh hơn</li>
+    </ul>
+    <p>"Load balancing" và "health checking" là hai mối quan tâm tách biệt nhưng thường được gộp chung vào một component.</p>
+
+    <h2>Health Check Chủ Động vs Bị Động</h2>
+    <ul>
+      <li><strong>Active health check</strong>: load balancer định kỳ gọi một endpoint riêng <code>/health</code> trên mỗi instance và loại nó khỏi vòng xoay sau N lần thất bại liên tiếp</li>
+      <li><strong>Passive health check</strong>: load balancer quan sát traffic thật và đánh dấu instance không khỏe mạnh sau khi nó trả về quá nhiều lỗi hoặc timeout, không cần probe riêng</li>
+      <li>Một instance vừa hồi phục thường được thêm lại <strong>từ từ</strong> ("slow start") thay vì nhận ngay toàn bộ phần traffic của nó, để tránh làm quá tải instance vừa hồi phục</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/load-balancing-health-checks/spec.architecture.json" target="_blank" rel="noopener">spec.architecture.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate architecture path/to/spec.architecture.json --quality showcase --json
+node bin/archify.mjs deliver architecture path/to/spec.architecture.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

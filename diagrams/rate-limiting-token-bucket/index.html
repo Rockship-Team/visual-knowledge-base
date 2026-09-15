@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rate Limiting: The Token Bucket Algorithm — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/rate-limiting-token-bucket" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Rate Limiting: The Token Bucket Algorithm</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">api-design</span>
+    <span class="tag">networking</span>
+    <span class="tag">reliability</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Rate limiting token bucket sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>The <strong>token bucket</strong> algorithm rate-limits a client by giving it a bucket of tokens that drains one per request and refills at a steady rate. It allows short bursts up to the bucket's capacity while still enforcing a long-term average rate.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Any public or shared API needs to protect itself from being overwhelmed by a single client — an accidental retry loop, a buggy client, or deliberate abuse — because without a limit, one client can starve capacity from everyone else.</p>
+    <p><strong>Where to spot it:</strong> Public API tiers with free/paid request limits, login/auth endpoints, third-party APIs you integrate with (and their limits on you), and <code>429</code> responses with a <code>Retry-After</code> header in API documentation.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Client</strong> sends <code>Request A</code> — the bucket has tokens available, consumes 1, forwarded to the <strong>API Server</strong>, returns <code>200 OK</code></li>
+      <li>Client sends a <strong>burst of requests</strong> that exceeds the remaining tokens — the bucket is now empty</li>
+      <li>Rate Limiter returns <code>429 Too Many Requests</code> — this request is rejected and never reaches the API Server</li>
+      <li>A refill interval elapses: the bucket regains tokens over time at a fixed rate</li>
+      <li>Client sends <code>Request B</code> after the bucket has refilled — consumes 1 token, forwarded, returns <code>200 OK</code> again</li>
+    </ol>
+    <p class="callout">The rejected burst never even reached the API server — the rate limiter protects the backend, not just the client's experience.</p>
+
+    <h2>How the Token Bucket Works</h2>
+    <ul>
+      <li><strong>Capacity</strong> sets the maximum burst size a client can send instantly</li>
+      <li><strong>Refill rate</strong> sets the sustained long-term average rate the bucket settles to</li>
+      <li>Each request costs 1 token (or more, for weighted endpoints) and is rejected once the bucket is empty, until it refills</li>
+    </ul>
+
+    <h2>Choosing Rate-Limiting Parameters</h2>
+    <ul>
+      <li>Apply buckets <strong>per-user, per-IP, or per-API-key</strong> rather than one global bucket, so one abusive client can't starve everyone</li>
+      <li>Always return a <code>Retry-After</code> header on <code>429</code> so well-behaved clients back off correctly instead of retrying immediately</li>
+      <li>Compared to sliding-window and fixed-window counters, the token bucket is generally preferred because it naturally smooths bursts</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/rate-limiting-token-bucket/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Thuật toán <strong>token bucket</strong> giới hạn tốc độ của client bằng cách cấp một bucket chứa token, mỗi request tiêu tốn 1 token và bucket được nạp lại (refill) đều đặn theo thời gian. Nó cho phép burst ngắn hạn tối đa bằng capacity của bucket, nhưng vẫn đảm bảo tốc độ trung bình dài hạn.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất kỳ API công khai hoặc dùng chung nào cũng cần tự bảo vệ khỏi bị một client duy nhất làm quá tải — một vòng lặp retry lỗi, client có bug, hoặc lạm dụng có chủ đích — vì nếu không giới hạn, một client có thể chiếm hết capacity của những người khác.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Các tier API công khai có giới hạn request free/paid, endpoint login/auth, các API bên thứ ba bạn tích hợp vào (và giới hạn của họ áp lên bạn), và response <code>429</code> kèm header <code>Retry-After</code> trong tài liệu API.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> gửi <code>Request A</code> — bucket còn token, tiêu 1 token, chuyển tới <strong>API Server</strong>, trả về <code>200 OK</code></li>
+      <li>Client gửi một <strong>burst request</strong> vượt quá số token còn lại — bucket đã cạn</li>
+      <li>Rate Limiter trả về <code>429 Too Many Requests</code> — request này bị từ chối và không bao giờ tới được API Server</li>
+      <li>Một khoảng refill trôi qua: bucket được nạp lại token theo thời gian với tốc độ cố định</li>
+      <li>Client gửi <code>Request B</code> sau khi bucket đã refill — tiêu 1 token, được chuyển tiếp, trả về <code>200 OK</code></li>
+    </ol>
+    <p class="callout">Burst bị từ chối không hề chạm tới API server — rate limiter bảo vệ backend, chứ không chỉ trải nghiệm của client.</p>
+
+    <h2>Cách Token Bucket Hoạt Động</h2>
+    <ul>
+      <li><strong>Capacity</strong> quy định kích thước burst tối đa client có thể gửi ngay lập tức</li>
+      <li><strong>Refill rate</strong> quy định tốc độ trung bình dài hạn mà bucket ổn định về</li>
+      <li>Mỗi request tốn 1 token (hoặc nhiều hơn với endpoint có trọng số), bị từ chối khi bucket cạn cho tới khi refill</li>
+    </ul>
+
+    <h2>Chọn Tham Số Rate Limiting</h2>
+    <ul>
+      <li>Áp dụng bucket <strong>theo user, theo IP, hoặc theo API key</strong> thay vì một bucket toàn cục, để một client lạm dụng không thể chiếm hết capacity của người khác</li>
+      <li>Luôn trả header <code>Retry-After</code> khi trả <code>429</code> để client tuân thủ đúng có thể lùi lại thay vì retry ngay lập tức</li>
+      <li>So với fixed-window hoặc sliding-window counter, token bucket thường được ưu tiên vì nó làm mượt burst tự nhiên hơn</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/rate-limiting-token-bucket/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>
