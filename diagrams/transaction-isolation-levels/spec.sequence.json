@@ -5,6 +5,7 @@
     "title": "Transaction Isolation Levels: Preventing the Non-Repeatable Read",
     "output": "diagrams/transaction-isolation-levels/diagram.html",
     "viewBox": [1000, 640],
+    "column_fit": "spread",
     "quality_profile": "showcase"
   },
   "participants": [
