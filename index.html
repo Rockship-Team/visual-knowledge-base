@@ -151,6 +151,60 @@
     </div>
   </section>
 
+  <section class="category-section" id="database-storage" data-category-label="Database & Storage">
+    <div class="category-head">
+      <h2 class="category-title">Database &amp; Storage</h2>
+    </div>
+    <p class="category-desc" data-lang="en">Transaction isolation, the N+1 query problem, indexing — the everyday correctness and performance issues behind most database bugs.</p>
+    <p class="category-desc" data-lang="vi" hidden>Transaction isolation, N+1 query problem, indexing — những vấn đề về correctness và performance thường gặp nhất khi làm việc với database.</p>
+    <div class="grid">
+      <a class="card"
+         href="diagrams/transaction-isolation-levels/"
+         data-type="sequence"
+         data-search="transaction isolation level read committed repeatable serializable non-repeatable read dirty phantom database concurrency">
+        <h2>Transaction Isolation Levels: Preventing the Non-Repeatable Read</h2>
+        <p class="desc" data-lang="en">Reading the same row twice inside one transaction can return two different values — this is what each isolation level does and doesn't prevent.</p>
+        <p class="desc" data-lang="vi" hidden>Đọc cùng một row hai lần trong một transaction có thể trả về hai giá trị khác nhau — đây là điều mỗi isolation level ngăn được và không ngăn được.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">database</span>
+          <span class="tag">transactions</span>
+          <span class="tag">concurrency</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/n-plus-one-query/"
+         data-type="sequence"
+         data-search="n+1 query problem orm lazy loading eager loading batch database performance">
+        <h2>The N+1 Query Problem</h2>
+        <p class="desc" data-lang="en">Fetching a list of N records fires 1 query for the list plus N extra queries for related data — a hidden ORM performance trap.</p>
+        <p class="desc" data-lang="vi" hidden>Lấy danh sách N bản ghi kích hoạt 1 query cho danh sách cộng thêm N query cho dữ liệu liên quan — cái bẫy hiệu năng ẩn của ORM.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">database</span>
+          <span class="tag">orm</span>
+          <span class="tag">performance</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/database-indexing-btree/"
+         data-type="workflow"
+         data-search="database indexing b-tree index scan full table scan query planner performance">
+        <h2>Database Indexing: Index Scan vs Full Table Scan</h2>
+        <p class="desc" data-lang="en">A query planner chooses between an O(n) full table scan and an O(log n) B-tree index scan — and why that choice matters as a table grows.</p>
+        <p class="desc" data-lang="vi" hidden>Query planner chọn giữa full table scan O(n) và index scan O(log n) qua B-tree — và vì sao lựa chọn đó ngày càng quan trọng khi bảng lớn dần.</p>
+        <div class="meta-row">
+          <span class="badge">workflow</span>
+          <span class="tag">database</span>
+          <span class="tag">performance</span>
+          <span class="tag">indexing</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
   <p id="catalog-empty" class="empty" hidden>
     <span data-lang="en">No matching topics found.</span>
     <span data-lang="vi" hidden>Không tìm thấy chủ đề nào khớp.</span>

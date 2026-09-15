@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "The N+1 Query Problem",
+    "output": "diagrams/n-plus-one-query/diagram.html",
+    "viewBox": [960, 560],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "client", "type": "external", "label": "Client", "sublabel": "browser / app" },
+    { "id": "api", "type": "backend", "label": "API", "sublabel": "ORM layer" },
+    { "id": "db", "type": "database", "label": "Database", "sublabel": "orders + items" }
+  ],
+  "segments": [
+    { "from": 145, "to": 235, "label": "Fetch order list" },
+    { "from": 235, "to": 415, "label": "N+1 loop: one query per order" },
+    { "from": 415, "to": 445, "label": "Return assembled response" }
+  ],
+  "messages": [
+    { "id": "get-orders", "from": "client", "to": "api", "y": 160, "label": "GET /orders", "variant": "default" },
+    { "id": "select-orders", "from": "api", "to": "db", "y": 190, "label": "SELECT * FROM orders", "variant": "default" },
+    { "id": "orders-rows", "from": "db", "to": "api", "y": 220, "label": "3 order rows", "variant": "return" },
+    { "id": "select-items-1", "from": "api", "to": "db", "y": 250, "label": "SELECT * FROM order_items WHERE order_id = 1", "variant": "emphasis" },
+    { "id": "items-rows-1", "from": "db", "to": "api", "y": 280, "label": "items for order 1", "variant": "return" },
+    { "id": "select-items-2", "from": "api", "to": "db", "y": 310, "label": "SELECT * FROM order_items WHERE order_id = 2", "variant": "emphasis" },
+    { "id": "items-rows-2", "from": "db", "to": "api", "y": 340, "label": "items for order 2", "variant": "return" },
+    { "id": "select-items-3", "from": "api", "to": "db", "y": 370, "label": "SELECT * FROM order_items WHERE order_id = 3", "variant": "emphasis" },
+    { "id": "items-rows-3", "from": "db", "to": "api", "y": 400, "label": "items for order 3", "variant": "return" },
+    { "id": "orders-response", "from": "api", "to": "client", "y": 430, "label": "200 JSON (orders + items)", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "api", "from": 160, "to": 435, "type": "backend" },
+    { "participant": "db", "from": 195, "to": 215, "type": "database" },
+    { "participant": "db", "from": 255, "to": 275, "type": "database" },
+    { "participant": "db", "from": 315, "to": 335, "type": "database" },
+    { "participant": "db", "from": 375, "to": 395, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Where the N+1 shows up",
+      "items": [
+        "1 query fetches the list of orders",
+        "Then one additional query fires per order to fetch its items — 3 orders, 3 extra queries",
+        "With 1,000 orders that becomes 1,001 queries for a single request"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Root Cause",
+      "items": [
+        "Most ORMs lazy-load associations by default — order.items fires a new query the first time it's accessed inside the loop",
+        "Invisible in code review and invisible on a small dev dataset — only shows up once the table grows in production"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "How to Fix It",
+      "items": [
+        "Eager loading: SQL JOIN, or the ORM's include/with/preload option, to fetch orders and items together",
+        "Batch loading: WHERE order_id IN (...) instead of one query per row",
+        "DataLoader pattern for GraphQL resolvers — batches and dedupes per request",
+        "Query logging / APM in dev or CI to catch N+1 patterns before production"
+      ]
+    }
+  ]
+}

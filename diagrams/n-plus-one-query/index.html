@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The N+1 Query Problem — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/n-plus-one-query" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">The N+1 Query Problem</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">database</span>
+    <span class="tag">orm</span>
+    <span class="tag">performance</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="N+1 query problem sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>The <strong>N+1 query problem</strong> happens when fetching a list of N parent records triggers 1 query for the list, plus N additional queries — one per item — for related data, instead of fetching everything in a constant number of queries.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Any time you loop over a list and, for each item, trigger a separate query to fetch related data — most ORMs make this invisible because the query fires lazily the moment you access the related property.</p>
+    <p><strong>Where to spot it:</strong> List endpoints that include nested/related resources (orders+items, posts+comments, users+roles), GraphQL resolvers that fetch a field per node, and APM/query-log traces showing dozens or hundreds of near-identical queries for a single request.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Client</strong> calls <code>GET /orders</code></li>
+      <li><strong>API</strong> runs <code>SELECT * FROM orders</code> → gets back 3 order rows</li>
+      <li>Looping over the 3 orders, the ORM lazily fires <code>SELECT * FROM order_items WHERE order_id = 1</code>, then <code>= 2</code>, then <code>= 3</code> — one query per order</li>
+      <li>API assembles the orders with their items and returns <code>200 JSON</code> to the client</li>
+    </ol>
+    <p class="callout">1 query for the order list + 3 queries for items (N = 3) = 4 queries for this small example. With 1,000 orders, that becomes <strong>1,001 queries for a single request</strong>.</p>
+
+    <h2>Root Cause</h2>
+    <ul>
+      <li>Most ORMs lazy-load associations by default, so <code>order.items</code> inside a loop silently fires a new query on first access</li>
+      <li>This is invisible in code review and invisible with small dev datasets, so it only becomes a visible problem once the table grows in production</li>
+    </ul>
+
+    <h2>How to Fix It</h2>
+    <ul>
+      <li><strong>Eager loading</strong>: a SQL <code>JOIN</code>, or the ORM's <code>include</code>/<code>with</code>/<code>preload</code> option, to fetch orders and items together in one or two queries</li>
+      <li><strong>Batch loading</strong>: <code>WHERE order_id IN (...)</code> instead of one query per row</li>
+      <li><strong>DataLoader pattern</strong> for GraphQL resolvers — batches and dedupes requests per tick</li>
+      <li><strong>Query logging / APM</strong> in development or CI to catch N+1 patterns before they reach production</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/n-plus-one-query/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p><strong>N+1 query problem</strong> xảy ra khi lấy danh sách N bản ghi cha kích hoạt 1 query cho danh sách, cộng thêm N query nữa — mỗi bản ghi một query — để lấy dữ liệu liên quan, thay vì lấy tất cả chỉ với một số lượng query cố định.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất cứ khi nào bạn lặp qua một danh sách và, với mỗi phần tử, kích hoạt một query riêng để lấy dữ liệu liên quan — hầu hết ORM khiến điều này vô hình vì query được bắn ra lazy ngay khi bạn truy cập property liên quan.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Endpoint trả danh sách có kèm resource liên quan (orders+items, posts+comments, users+roles), GraphQL resolver lấy một field cho từng node, và trace APM/query-log cho thấy hàng chục hoặc hàng trăm query gần giống hệt nhau cho một request.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> gọi <code>GET /orders</code></li>
+      <li><strong>API</strong> chạy <code>SELECT * FROM orders</code> → nhận về 3 dòng order</li>
+      <li>Lặp qua 3 order, ORM lazy bắn ra <code>SELECT * FROM order_items WHERE order_id = 1</code>, rồi <code>= 2</code>, rồi <code>= 3</code> — mỗi order một query</li>
+      <li>API ghép các order với item của chúng và trả <code>200 JSON</code> về client</li>
+    </ol>
+    <p class="callout">1 query cho danh sách order + 3 query cho item (N = 3) = 4 query cho ví dụ nhỏ này. Với 1.000 order, con số đó trở thành <strong>1.001 query cho một request</strong>.</p>
+
+    <h2>Nguyên nhân gốc rễ</h2>
+    <ul>
+      <li>Hầu hết ORM lazy-load association theo mặc định, nên <code>order.items</code> bên trong vòng lặp âm thầm bắn ra một query mới ngay lần truy cập đầu tiên</li>
+      <li>Điều này vô hình khi code review và vô hình với dataset dev nhỏ, nên chỉ trở thành vấn đề rõ ràng khi bảng dữ liệu lớn dần trên production</li>
+    </ul>
+
+    <h2>Cách khắc phục</h2>
+    <ul>
+      <li><strong>Eager loading</strong>: dùng SQL <code>JOIN</code>, hoặc option <code>include</code>/<code>with</code>/<code>preload</code> của ORM, để lấy order và item cùng lúc trong một hoặc hai query</li>
+      <li><strong>Batch loading</strong>: dùng <code>WHERE order_id IN (...)</code> thay vì một query cho mỗi dòng</li>
+      <li><strong>DataLoader pattern</strong> cho GraphQL resolver — gộp và loại trùng request trong cùng một tick</li>
+      <li><strong>Query logging / APM</strong> ở môi trường dev hoặc CI để bắt các pattern N+1 trước khi chúng lên production</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/n-plus-one-query/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

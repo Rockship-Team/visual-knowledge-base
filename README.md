@@ -25,6 +25,14 @@ Mỗi chủ đề nằm trong `diagrams/<slug>/` gồm:
 | Leader Election: Raft Consensus Basics | lifecycle | [diagrams/leader-election-raft](./diagrams/leader-election-raft) |
 | Eventual Consistency: Read-Your-Writes Anomaly | dataflow | [diagrams/eventual-consistency](./diagrams/eventual-consistency) |
 
+### Database & Storage
+
+| Chủ đề | Loại | Link |
+|---|---|---|
+| Transaction Isolation Levels: Preventing the Non-Repeatable Read | sequence | [diagrams/transaction-isolation-levels](./diagrams/transaction-isolation-levels) |
+| The N+1 Query Problem | sequence | [diagrams/n-plus-one-query](./diagrams/n-plus-one-query) |
+| Database Indexing: Index Scan vs Full Table Scan | workflow | [diagrams/database-indexing-btree](./diagrams/database-indexing-btree) |
+
 ## Đóng góp thêm chủ đề
 
 Xem [CONTRIBUTING.md](./CONTRIBUTING.md).

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Transaction Isolation Levels: Preventing the Non-Repeatable Read",
+    "output": "diagrams/transaction-isolation-levels/diagram.html",
+    "viewBox": [1000, 640],
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "txnA", "type": "external", "label": "Transaction A", "sublabel": "reads balance twice" },
+    { "id": "txnB", "type": "external", "label": "Transaction B", "sublabel": "updates balance" },
+    { "id": "db", "type": "database", "label": "Database", "sublabel": "Read Committed" }
+  ],
+  "segments": [
+    { "from": 145, "to": 235, "label": "A begins, reads balance (first read)" },
+    { "from": 235, "to": 385, "label": "B updates and commits" },
+    { "from": 385, "to": 505, "label": "A reads again (non-repeatable read)" }
+  ],
+  "messages": [
+    { "id": "a-begin", "from": "txnA", "to": "db", "y": 160, "label": "BEGIN", "variant": "default" },
+    { "id": "a-select-1", "from": "txnA", "to": "db", "y": 190, "label": "SELECT balance", "variant": "default" },
+    { "id": "a-select-1-ret", "from": "db", "to": "txnA", "y": 220, "label": "balance = 100", "variant": "return" },
+    { "id": "b-begin", "from": "txnB", "to": "db", "y": 250, "label": "BEGIN", "variant": "default" },
+    { "id": "b-update", "from": "txnB", "to": "db", "y": 280, "label": "UPDATE balance = 150", "variant": "default" },
+    { "id": "b-update-ret", "from": "db", "to": "txnB", "y": 310, "label": "OK", "variant": "return" },
+    { "id": "b-commit", "from": "txnB", "to": "db", "y": 340, "label": "COMMIT", "variant": "default" },
+    { "id": "b-commit-ret", "from": "db", "to": "txnB", "y": 370, "label": "committed", "variant": "return" },
+    { "id": "a-select-2", "from": "txnA", "to": "db", "y": 400, "label": "SELECT balance (same query)", "variant": "default" },
+    { "id": "a-select-2-ret", "from": "db", "to": "txnA", "y": 430, "label": "balance = 150", "variant": "emphasis" },
+    { "id": "a-commit", "from": "txnA", "to": "db", "y": 460, "label": "COMMIT", "variant": "default" },
+    { "id": "a-commit-ret", "from": "db", "to": "txnA", "y": 490, "label": "committed", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "db", "from": 165, "to": 225, "type": "database" },
+    { "participant": "db", "from": 255, "to": 375, "type": "database" },
+    { "participant": "db", "from": 405, "to": 495, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Where the Anomaly Happens",
+      "items": [
+        "Two reads in the same transaction return different values",
+        "Transaction B committed a change in between the two reads",
+        "This is called a non-repeatable read"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Why It Happens",
+      "items": [
+        "Read Committed only guarantees you see committed data at the moment of each read",
+        "It does not guarantee the same snapshot across multiple reads in one transaction",
+        "Postgres defaults to Read Committed; MySQL/InnoDB defaults to Repeatable Read"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "How to Prevent It",
+      "items": [
+        "Use Repeatable Read or Serializable when a transaction needs a consistent view across multiple reads",
+        "Combine with retry-on-conflict logic at the application layer",
+        "Or lock just the hot rows explicitly with SELECT ... FOR UPDATE"
+      ]
+    }
+  ]
+}

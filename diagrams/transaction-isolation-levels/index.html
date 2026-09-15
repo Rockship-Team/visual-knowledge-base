@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Transaction Isolation Levels: Preventing the Non-Repeatable Read — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/transaction-isolation-levels" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Transaction Isolation Levels: Preventing the Non-Repeatable Read</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">database</span>
+    <span class="tag">transactions</span>
+    <span class="tag">concurrency</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Transaction isolation levels sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>A transaction's <strong>isolation level</strong> controls what it can see of another transaction's uncommitted or committed changes. The SQL standard defines four levels — Read Uncommitted, Read Committed, Repeatable Read, Serializable — each trading off correctness against concurrency and performance.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Every database transaction runs at some isolation level whether you picked it explicitly or not — the risk shows up any time a transaction reads the same data more than once, or when two transactions can interleave.</p>
+    <p><strong>Where to spot it:</strong> Reports/dashboards computing a value from multiple queries inside one transaction, financial reconciliation logic, "read a total then act on it" patterns, and bugs where the same page shows inconsistent numbers within a single request.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Transaction A</strong>: <code>BEGIN</code></li>
+      <li>A: <code>SELECT balance FROM accounts WHERE id = 1</code> → returns <code>100</code></li>
+      <li><strong>Transaction B</strong>: <code>BEGIN</code></li>
+      <li>B: <code>UPDATE accounts SET balance = 150 WHERE id = 1</code></li>
+      <li>B: <code>COMMIT</code></li>
+      <li>A (same still-open transaction) runs the <strong>exact same query again</strong>: <code>SELECT balance FROM accounts WHERE id = 1</code> → this time returns <code>150</code></li>
+      <li>A: <code>COMMIT</code></li>
+    </ol>
+    <p class="callout">Under Read Committed, the same query returned two different values inside one transaction — a <strong>non-repeatable read</strong>. Under Repeatable Read or Serializable, step 6 would still return <code>100</code>.</p>
+
+    <h2>The Four Isolation Levels</h2>
+    <ul>
+      <li><strong>Read Uncommitted</strong>: allows dirty reads, non-repeatable reads, and phantom reads — rarely used in practice</li>
+      <li><strong>Read Committed</strong>: prevents dirty reads, but still allows non-repeatable reads and phantom reads — this is the scenario above, and the default in Postgres</li>
+      <li><strong>Repeatable Read</strong>: prevents dirty reads and non-repeatable reads; whether phantom reads are also prevented depends on the engine — Postgres's snapshot-based Repeatable Read happens to prevent phantom reads too, going beyond the SQL standard's minimum guarantee. This is the default in MySQL/InnoDB.</li>
+      <li><strong>Serializable</strong>: prevents all three anomalies, but transactions may fail with a serialization error and need an application-level retry</li>
+    </ul>
+
+    <h2>How to Choose</h2>
+    <ul>
+      <li><strong>Read Committed</strong> for most everyday CRUD — good performance, good enough correctness for most operations</li>
+      <li><strong>Repeatable Read</strong> when a single transaction needs a consistent view across multiple reads, e.g. generating a report</li>
+      <li><strong>Serializable</strong> for correctness-critical logic (e.g. financial transfers), combined with retry-on-conflict logic at the application layer</li>
+      <li>Or skip raising the isolation level altogether and use explicit row locking (<code>SELECT ... FOR UPDATE</code>) on just the hot rows instead</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/transaction-isolation-levels/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p><strong>Isolation level</strong> của một transaction quyết định nó nhìn thấy được gì từ thay đổi (chưa commit hoặc đã commit) của transaction khác. Chuẩn SQL định nghĩa 4 mức — Read Uncommitted, Read Committed, Repeatable Read, Serializable — mỗi mức đánh đổi giữa tính đúng đắn với khả năng chạy đồng thời và hiệu năng.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Mọi transaction database đều chạy ở một isolation level nào đó, dù bạn có chọn tường minh hay không — rủi ro xuất hiện bất cứ khi nào một transaction đọc cùng một dữ liệu nhiều hơn một lần, hoặc khi hai transaction có thể xen kẽ nhau.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Report/dashboard tính giá trị từ nhiều query trong cùng một transaction, logic đối soát tài chính, pattern "đọc tổng rồi hành động dựa trên đó", và bug kiểu cùng một trang hiển thị số liệu không nhất quán trong một request.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Transaction A</strong>: <code>BEGIN</code></li>
+      <li>A: <code>SELECT balance FROM accounts WHERE id = 1</code> → trả về <code>100</code></li>
+      <li><strong>Transaction B</strong>: <code>BEGIN</code></li>
+      <li>B: <code>UPDATE accounts SET balance = 150 WHERE id = 1</code></li>
+      <li>B: <code>COMMIT</code></li>
+      <li>A (vẫn cùng transaction đang mở) chạy lại <strong>đúng query đó</strong>: <code>SELECT balance FROM accounts WHERE id = 1</code> → lần này trả về <code>150</code></li>
+      <li>A: <code>COMMIT</code></li>
+    </ol>
+    <p class="callout">Dưới Read Committed, cùng một query trả về hai giá trị khác nhau trong một transaction — đây gọi là <strong>non-repeatable read</strong>. Dưới Repeatable Read hoặc Serializable, bước 6 vẫn sẽ trả về <code>100</code>.</p>
+
+    <h2>Bốn Mức Isolation</h2>
+    <ul>
+      <li><strong>Read Uncommitted</strong>: cho phép dirty read, non-repeatable read, và phantom read — hiếm khi dùng trong thực tế</li>
+      <li><strong>Read Committed</strong>: ngăn dirty read, nhưng vẫn cho phép non-repeatable read và phantom read — đây chính là kịch bản ở trên, và là mặc định của Postgres</li>
+      <li><strong>Repeatable Read</strong>: ngăn dirty read và non-repeatable read; có ngăn được phantom read hay không tùy engine — Repeatable Read dựa trên snapshot của Postgres tình cờ ngăn luôn cả phantom read, vượt quá mức tối thiểu của chuẩn SQL. Đây là mặc định của MySQL/InnoDB.</li>
+      <li><strong>Serializable</strong>: ngăn cả ba loại anomaly, nhưng transaction có thể fail với lỗi serialization và cần retry ở tầng ứng dụng</li>
+    </ul>
+
+    <h2>Cách Lựa Chọn</h2>
+    <ul>
+      <li><strong>Read Committed</strong> cho phần lớn CRUD hàng ngày — hiệu năng tốt, độ đúng đắn đủ dùng cho hầu hết thao tác</li>
+      <li><strong>Repeatable Read</strong> khi một transaction cần nhìn thấy một view nhất quán xuyên suốt nhiều lần đọc, ví dụ khi tạo report</li>
+      <li><strong>Serializable</strong> cho logic đòi hỏi tính đúng đắn cao (ví dụ chuyển tiền), kết hợp với retry-on-conflict ở tầng ứng dụng</li>
+      <li>Hoặc không cần nâng isolation level, chỉ cần khóa tường minh (<code>SELECT ... FOR UPDATE</code>) đúng những row "nóng"</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/transaction-isolation-levels/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

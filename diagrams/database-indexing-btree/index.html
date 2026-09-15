@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Database Indexing: Index Scan vs Full Table Scan — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/database-indexing-btree" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Database Indexing: Index Scan vs Full Table Scan</h1>
+  <div class="topic-meta">
+    <span class="badge">workflow</span>
+    <span class="tag">database</span>
+    <span class="tag">performance</span>
+    <span class="tag">indexing</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Database indexing B-tree workflow diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>A database index (commonly a <strong>B-tree</strong>) lets the query planner jump almost directly to matching rows instead of scanning the whole table. Whether a query uses the index or not can be the difference between microseconds and seconds as a table grows.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Any query with a <code>WHERE</code>, <code>JOIN</code>, <code>ORDER BY</code>, or <code>GROUP BY</code> on a column without a suitable index gets progressively slower as the table grows, because a full scan's cost grows linearly with row count.</p>
+    <p><strong>Where to spot it:</strong> Slow query logs, <code>EXPLAIN ANALYZE</code> output showing "Seq Scan" on a large table, endpoints that were fast in development (small dataset) but slow in production (large dataset), and foreign-key columns used in <code>JOIN</code>s without an index.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li>A <strong>Client</strong> sends <code>SELECT * FROM users WHERE email = 'x@example.com'</code></li>
+      <li>The <strong>Query Planner</strong> checks whether there's a usable, selective index on <code>email</code></li>
+      <li><strong>No usable index</strong>: <strong>Full Table Scan</strong> — read every page of the table sequentially, checking each row against the condition</li>
+      <li><strong>A selective B-tree index exists</strong>: <strong>Index Scan</strong> — traverse the tree from root to branch to leaf, then follow the leaf's pointer to fetch the matching row from the table heap</li>
+      <li>Either way, matching rows are returned to the client</li>
+    </ol>
+    <p class="callout">Cost comparison: a full table scan is <strong>O(n)</strong> — it gets linearly slower as the table grows. An index scan is <strong>O(log n)</strong> to find the leaf, plus a small constant-time hop to fetch the row — it barely slows down even at millions of rows.</p>
+
+    <h2>How a B-Tree Index Works</h2>
+    <ul>
+      <li>Keys are stored sorted in a balanced tree; each node holds many keys (sized to a disk page, often hundreds), so the tree stays shallow — often just 3-4 levels even for a table with millions of rows</li>
+      <li>A lookup walks root → branch → leaf, comparing keys at each level to narrow down the search</li>
+      <li>The leaf node stores a pointer to the actual row in the table heap — that's the extra hop that makes this an "index scan" rather than a "covering" read, unless the index itself already contains every column the query needs</li>
+    </ul>
+
+    <h2>Trade-Offs and When Not to Index</h2>
+    <ul>
+      <li>An index isn't free: every <code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code> also has to update the index, and the index itself takes disk space</li>
+      <li>Avoid indexing low-cardinality columns (e.g. a boolean flag) where a scan touches most rows anyway</li>
+      <li>Skip indexing very small tables, where a full scan is already fast, and columns rarely used in filters/joins/sorts</li>
+      <li><strong>Do</strong> index foreign keys and columns in frequent <code>WHERE</code>/<code>JOIN</code>/<code>ORDER BY</code> clauses; consider a composite index when queries always filter on the same combination of columns together</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/database-indexing-btree/spec.workflow.json" target="_blank" rel="noopener">spec.workflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate workflow path/to/spec.workflow.json --quality showcase --json
+node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Một index trong database (thường là <strong>B-tree</strong>) giúp query planner nhảy gần như thẳng tới các row khớp điều kiện thay vì phải quét toàn bộ bảng. Việc một query có dùng được index hay không có thể tạo ra khác biệt giữa vài micro giây và vài giây khi bảng lớn dần.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất kỳ query nào có <code>WHERE</code>, <code>JOIN</code>, <code>ORDER BY</code>, hoặc <code>GROUP BY</code> trên một cột không có index phù hợp sẽ chậm dần khi bảng lớn lên, vì chi phí full scan tăng tuyến tính theo số dòng.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Slow query log, output <code>EXPLAIN ANALYZE</code> hiện "Seq Scan" trên bảng lớn, endpoint chạy nhanh lúc dev (dataset nhỏ) nhưng chậm ở production (dataset lớn), và cột foreign key dùng trong <code>JOIN</code> mà không có index.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> gửi <code>SELECT * FROM users WHERE email = 'x@example.com'</code></li>
+      <li><strong>Query Planner</strong> kiểm tra xem có index nào dùng được và đủ selective trên <code>email</code> không</li>
+      <li><strong>Không có index phù hợp</strong>: <strong>Full Table Scan</strong> — đọc tuần tự từng page của bảng, kiểm tra từng row với điều kiện</li>
+      <li><strong>Có B-tree index đủ selective</strong>: <strong>Index Scan</strong> — duyệt cây từ root qua branch xuống leaf, rồi theo pointer ở leaf để lấy row tương ứng từ table heap</li>
+      <li>Dù theo nhánh nào, các row khớp điều kiện đều được trả về client</li>
+    </ol>
+    <p class="callout">So sánh chi phí: full table scan là <strong>O(n)</strong> — chậm dần tuyến tính khi bảng lớn lên. Index scan là <strong>O(log n)</strong> để tìm tới leaf, cộng thêm một bước lấy row với chi phí gần như hằng số — gần như không chậm đi kể cả khi bảng có hàng triệu dòng.</p>
+
+    <h2>Cách B-Tree Index Hoạt Động</h2>
+    <ul>
+      <li>Các key được lưu có thứ tự trong một cây cân bằng; mỗi node chứa nhiều key (kích thước bằng một disk page, thường hàng trăm key), nên cây luôn nông — thường chỉ 3-4 tầng dù bảng có hàng triệu dòng</li>
+      <li>Một lần tra cứu đi từ root → branch → leaf, so sánh key ở mỗi tầng để thu hẹp phạm vi tìm kiếm</li>
+      <li>Leaf node lưu một pointer trỏ tới row thật trong table heap — đây là bước phụ khiến nó gọi là "index scan" chứ không phải "covering read", trừ khi bản thân index đã chứa đủ mọi cột query cần</li>
+    </ul>
+
+    <h2>Đánh Đổi và Khi Nào Không Nên Index</h2>
+    <ul>
+      <li>Index không miễn phí: mỗi <code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code> cũng phải cập nhật index, và bản thân index chiếm thêm dung lượng đĩa</li>
+      <li>Tránh index các cột có cardinality thấp (ví dụ một cờ boolean), vì scan vẫn phải chạm hầu hết các row</li>
+      <li>Bỏ qua việc index bảng rất nhỏ, nơi full scan đã đủ nhanh, và các cột hiếm khi xuất hiện trong filter/join/sort</li>
+      <li><strong>Nên</strong> index foreign key và các cột thường xuất hiện trong <code>WHERE</code>/<code>JOIN</code>/<code>ORDER BY</code>; cân nhắc composite index khi query luôn lọc theo cùng một tổ hợp cột</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/database-indexing-btree/spec.workflow.json" target="_blank" rel="noopener">spec.workflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate workflow path/to/spec.workflow.json --quality showcase --json
+node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

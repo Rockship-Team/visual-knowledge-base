@@ -1,0 +1,156 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Database Indexing: Index Scan vs Full Table Scan",
+    "output": "diagram.html",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "flow",
+      "label": "Main Path"
+    },
+    {
+      "id": "fullscan_lane",
+      "label": "Full Table Scan Path",
+      "variant": "exception"
+    },
+    {
+      "id": "indexscan_lane",
+      "label": "Index Scan Path"
+    }
+  ],
+  "phases": [
+    {
+      "id": "incoming",
+      "label": "Query Arrives",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "strategy",
+      "label": "Scan Strategy",
+      "fromCol": 2,
+      "toCol": 2,
+      "variant": "emphasis"
+    },
+    {
+      "id": "result",
+      "label": "Return",
+      "fromCol": 3,
+      "toCol": 3
+    }
+  ],
+  "mainPath": [
+    "client",
+    "planner",
+    "indexscan",
+    "return_rows"
+  ],
+  "nodes": [
+    {
+      "id": "client",
+      "lane": "flow",
+      "col": 0,
+      "type": "external",
+      "label": "Client",
+      "sublabel": "SELECT ... WHERE email = ?",
+      "width": 150
+    },
+    {
+      "id": "planner",
+      "lane": "flow",
+      "col": 1,
+      "type": "backend",
+      "label": "Query Planner",
+      "sublabel": "checks index on email",
+      "width": 150
+    },
+    {
+      "id": "fullscan",
+      "lane": "fullscan_lane",
+      "col": 2,
+      "type": "database",
+      "label": "Full Table Scan",
+      "sublabel": "reads every page, O(n)",
+      "width": 150
+    },
+    {
+      "id": "indexscan",
+      "lane": "indexscan_lane",
+      "col": 2,
+      "type": "database",
+      "label": "Index Scan (B-Tree)",
+      "sublabel": "root to leaf, O(log n)",
+      "width": 150
+    },
+    {
+      "id": "return_rows",
+      "lane": "flow",
+      "col": 3,
+      "type": "external",
+      "label": "Return Rows",
+      "sublabel": "matching rows sent to client",
+      "width": 150
+    }
+  ],
+  "edges": [
+    {
+      "id": "client-planner",
+      "from": "client",
+      "to": "planner",
+      "variant": "default"
+    },
+    {
+      "id": "planner-fullscan",
+      "from": "planner",
+      "to": "fullscan",
+      "label": "no usable index",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "planner-indexscan",
+      "from": "planner",
+      "to": "indexscan",
+      "label": "selective index found",
+      "variant": "emphasis",
+      "role": "branch"
+    },
+    {
+      "id": "fullscan-return",
+      "from": "fullscan",
+      "to": "return_rows",
+      "variant": "dashed",
+      "role": "return"
+    },
+    {
+      "id": "indexscan-return",
+      "from": "indexscan",
+      "to": "return_rows",
+      "variant": "default",
+      "role": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "orange",
+      "title": "How the B-Tree Stays Shallow",
+      "items": [
+        "Each node holds hundreds of keys, sized to a disk page",
+        "A lookup walks root to branch to leaf in just 3-4 hops, even with millions of rows",
+        "The leaf stores a pointer, so fetching the actual row is one extra hop"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "When Indexing Isn't Worth It",
+      "items": [
+        "Every INSERT/UPDATE/DELETE also has to update the index",
+        "Low-cardinality columns (e.g. a boolean) gain little, since most rows match anyway",
+        "Very small tables: a full scan is already fast"
+      ]
+    }
+  ]
+}
