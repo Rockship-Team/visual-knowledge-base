@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Race Condition: Lost Update — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/race-condition-lost-update" target="_blank" rel="noopener">Xem trên GitHub</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Race Condition: Lost Update</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">concurrency</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">database</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
+      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+    </div>
+    <iframe src="diagram.html" title="Race condition lost update sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose">
+    <h2>Tóm tắt</h2>
+    <p>Minh họa race condition kiểu <strong>Lost Update</strong> trên số dư tài khoản, khi hai client cùng đọc-tính-ghi (read-modify-write) mà không có cơ chế đồng bộ.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client A</strong> đọc <code>balance = 100</code> → tính <code>100 + 50 = 150</code></li>
+      <li>Trước khi A kịp ghi, <strong>Client B</strong> cũng đọc <code>balance = 100</code> (giá trị cũ, chưa cập nhật) → cũng tính ra <code>150</code></li>
+      <li>A ghi <code>balance = 150</code> (đúng tại thời điểm đó)</li>
+      <li>B ghi đè <code>balance = 150</code> — đáng lẽ phải là <code>200</code> vì cả hai lần nạp 50 đều phải được tính</li>
+    </ol>
+    <p class="callout">Kết quả cuối: <strong>150 thay vì 200</strong> — mất trắng một lần cập nhật của A.</p>
+
+    <h2>Nguyên nhân gốc rễ</h2>
+    <ul>
+      <li>Thao tác "đọc → tính → ghi" gồm 3 bước tách rời, không atomic</li>
+      <li>Không có khóa (lock) hay kiểm soát isolation giữa 2 transaction chạy song song</li>
+      <li>Thứ tự xen kẽ (interleaving) do scheduler quyết định, không đoán trước được — kết quả phụ thuộc timing chứ không phải logic</li>
+    </ul>
+
+    <h2>Cách khắc phục</h2>
+    <ul>
+      <li><strong>Atomic update</strong> ở DB: <code>UPDATE balance = balance + 50</code> thay vì đọc rồi tính rồi ghi</li>
+      <li><strong>Optimistic locking</strong>: thêm cột <code>version</code>, chỉ ghi nếu version còn khớp, ngược lại retry</li>
+      <li><strong>Pessimistic locking</strong>: <code>SELECT ... FOR UPDATE</code>, hoặc mutex/semaphore ở tầng ứng dụng</li>
+      <li><strong>Serializable isolation level</strong> để DB tự phát hiện và từ chối transaction xung đột</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/race-condition-lost-update/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../">← Quay lại danh mục</a>
+  </div>
+</footer>
+</body>
+</html>
