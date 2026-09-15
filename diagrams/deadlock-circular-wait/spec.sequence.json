@@ -5,6 +5,7 @@
     "title": "Deadlock: Circular Wait Between Two Transactions",
     "output": "deadlock-circular-wait.html",
     "viewBox": [900, 620],
+    "column_fit": "spread",
     "quality_profile": "showcase"
   },
   "participants": [

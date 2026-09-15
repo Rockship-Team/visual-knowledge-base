@@ -5,6 +5,7 @@
     "title": "Distributed Lock",
     "output": "distributed-lock.html",
     "viewBox": [1050, 780],
+    "column_fit": "spread",
     "quality_profile": "showcase"
   },
   "participants": [

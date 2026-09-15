@@ -5,6 +5,7 @@
     "title": "Race Condition: Lost Update on an Account Balance",
     "output": "race-condition-lost-update.html",
     "viewBox": [1000, 760],
+    "column_fit": "spread",
     "quality_profile": "showcase"
   },
   "participants": [

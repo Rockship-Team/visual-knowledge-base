@@ -5,6 +5,7 @@
     "title": "TCP and TLS Handshake: What Happens Before Your First Byte",
     "output": "tcp-tls-handshake.html",
     "viewBox": [1000, 620],
+    "column_fit": "spread",
     "quality_profile": "showcase"
   },
   "participants": [

@@ -5165,164 +5165,164 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <rect data-graph-role="structural-frame" data-composition-frame-kind="segment" data-composition-frame-id="3" x="48" y="445" width="804" height="60" rx="10" class="c-lane" stroke-width="1"/>
 
         <!-- Lifelines -->
-        <path d="M 62 142 L 62 555" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
-        <path d="M 170 142 L 170 555" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
-        <path d="M 278 142 L 278 555" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 157 142 L 157 555" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 461 142 L 461 555" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 765 142 L 765 555" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
 
         <!-- Activations -->
-        <rect x="273" y="160" width="10" height="335" rx="3" class="c-mask"/>
-        <rect x="273" y="160" width="10" height="335" rx="3" class="c-database" stroke-width="1"/>
+        <rect x="760" y="160" width="10" height="335" rx="3" class="c-mask"/>
+        <rect x="760" y="160" width="10" height="335" rx="3" class="c-database" stroke-width="1"/>
 
         <!-- Messages -->
         <g data-edge-from="txnA" data-edge-to="db" data-edge-label="LOCK Row 1" data-edge-key="0" data-edge-id="a-lock-row1">
-          <path data-composition-edge-from="txnA" data-composition-edge-to="db" data-composition-edge-id="a-lock-row1" data-composition-points="69,160;271,160" d="M 69 160 L 271 160" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+          <path data-composition-edge-from="txnA" data-composition-edge-to="db" data-composition-edge-id="a-lock-row1" data-composition-points="164,160;758,160" d="M 164 160 L 758 160" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="138" y="140" width="64" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="150" class="t-backend" font-size="9" text-anchor="middle">LOCK Row 1</text>
+          <rect x="429" y="140" width="64" height="16" rx="3" class="c-mask"/>
+          <text x="461" y="150" class="t-backend" font-size="9" text-anchor="middle">LOCK Row 1</text>
         </g>
         </g>
 
         <g data-edge-from="db" data-edge-to="txnA" data-edge-label="OK (lock granted)" data-edge-key="1" data-edge-id="a-lock-row1-ok">
-          <path data-composition-edge-from="db" data-composition-edge-to="txnA" data-composition-edge-id="a-lock-row1-ok" data-composition-points="271,190;69,190" d="M 271 190 L 69 190" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+          <path data-composition-edge-from="db" data-composition-edge-to="txnA" data-composition-edge-id="a-lock-row1-ok" data-composition-points="758,190;164,190" d="M 758 190 L 164 190" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="119.8" y="170" width="100.4" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="180" class="t-muted" font-size="9" text-anchor="middle">OK (lock granted)</text>
+          <rect x="410.8" y="170" width="100.4" height="16" rx="3" class="c-mask"/>
+          <text x="461" y="180" class="t-muted" font-size="9" text-anchor="middle">OK (lock granted)</text>
         </g>
         </g>
 
         <g data-edge-from="txnB" data-edge-to="db" data-edge-label="LOCK Row 2" data-edge-key="2" data-edge-id="b-lock-row2">
-          <path data-composition-edge-from="txnB" data-composition-edge-to="db" data-composition-edge-id="b-lock-row2" data-composition-points="177,220;271,220" d="M 177 220 L 271 220" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+          <path data-composition-edge-from="txnB" data-composition-edge-to="db" data-composition-edge-id="b-lock-row2" data-composition-points="468,220;758,220" d="M 468 220 L 758 220" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="192" y="200" width="64" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="210" class="t-backend" font-size="9" text-anchor="middle">LOCK Row 2</text>
+          <rect x="581" y="200" width="64" height="16" rx="3" class="c-mask"/>
+          <text x="613" y="210" class="t-backend" font-size="9" text-anchor="middle">LOCK Row 2</text>
         </g>
         </g>
 
         <g data-edge-from="db" data-edge-to="txnB" data-edge-label="OK (lock granted)" data-edge-key="3" data-edge-id="b-lock-row2-ok">
-          <path data-composition-edge-from="db" data-composition-edge-to="txnB" data-composition-edge-id="b-lock-row2-ok" data-composition-points="271,250;177,250" d="M 271 250 L 177 250" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+          <path data-composition-edge-from="db" data-composition-edge-to="txnB" data-composition-edge-id="b-lock-row2-ok" data-composition-points="758,250;468,250" d="M 758 250 L 468 250" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="173.8" y="230" width="100.4" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="240" class="t-muted" font-size="9" text-anchor="middle">OK (lock granted)</text>
+          <rect x="562.8" y="230" width="100.4" height="16" rx="3" class="c-mask"/>
+          <text x="613" y="240" class="t-muted" font-size="9" text-anchor="middle">OK (lock granted)</text>
         </g>
         </g>
 
         <g data-edge-from="txnA" data-edge-to="db" data-edge-label="LOCK Row 2 (request)" data-edge-key="4" data-edge-id="a-lock-row2-req">
-          <path data-composition-edge-from="txnA" data-composition-edge-to="db" data-composition-edge-id="a-lock-row2-req" data-composition-points="69,280;271,280" d="M 69 280 L 271 280" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+          <path data-composition-edge-from="txnA" data-composition-edge-to="db" data-composition-edge-id="a-lock-row2-req" data-composition-points="164,280;758,280" d="M 164 280 L 758 280" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="112" y="260" width="116" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="270" class="t-backend" font-size="9" text-anchor="middle">LOCK Row 2 (request)</text>
+          <rect x="403" y="260" width="116" height="16" rx="3" class="c-mask"/>
+          <text x="461" y="270" class="t-backend" font-size="9" text-anchor="middle">LOCK Row 2 (request)</text>
         </g>
         </g>
 
         <g data-edge-from="db" data-edge-to="txnA" data-edge-label="WAITING... for B to release" data-edge-key="5" data-edge-id="a-waiting">
-          <path data-composition-edge-from="db" data-composition-edge-to="txnA" data-composition-edge-id="a-waiting" data-composition-points="271,310;69,310" d="M 271 310 L 69 310" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
+          <path data-composition-edge-from="db" data-composition-edge-to="txnA" data-composition-edge-id="a-waiting" data-composition-points="758,310;164,310" d="M 758 310 L 164 310" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
         <g data-detail="context">
-          <rect x="93.8" y="290" width="152.4" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="300" class="t-messagebus" font-size="9" text-anchor="middle">WAITING... for B to release</text>
+          <rect x="384.8" y="290" width="152.4" height="16" rx="3" class="c-mask"/>
+          <text x="461" y="300" class="t-messagebus" font-size="9" text-anchor="middle">WAITING... for B to release</text>
         </g>
         </g>
 
         <g data-edge-from="txnB" data-edge-to="db" data-edge-label="LOCK Row 1 (request)" data-edge-key="6" data-edge-id="b-lock-row1-req">
-          <path data-composition-edge-from="txnB" data-composition-edge-to="db" data-composition-edge-id="b-lock-row1-req" data-composition-points="177,340;271,340" d="M 177 340 L 271 340" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+          <path data-composition-edge-from="txnB" data-composition-edge-to="db" data-composition-edge-id="b-lock-row1-req" data-composition-points="468,340;758,340" d="M 468 340 L 758 340" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="166" y="320" width="116" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="330" class="t-backend" font-size="9" text-anchor="middle">LOCK Row 1 (request)</text>
+          <rect x="555" y="320" width="116" height="16" rx="3" class="c-mask"/>
+          <text x="613" y="330" class="t-backend" font-size="9" text-anchor="middle">LOCK Row 1 (request)</text>
         </g>
         </g>
 
         <g data-edge-from="db" data-edge-to="txnB" data-edge-label="WAITING... deadlock!" data-edge-key="7" data-edge-id="b-waiting">
-          <path data-composition-edge-from="db" data-composition-edge-to="txnB" data-composition-edge-id="b-waiting" data-composition-points="271,370;177,370" d="M 271 370 L 177 370" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
+          <path data-composition-edge-from="db" data-composition-edge-to="txnB" data-composition-edge-id="b-waiting" data-composition-points="758,370;468,370" d="M 758 370 L 468 370" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
         <g data-detail="context">
-          <rect x="166" y="350" width="116" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="360" class="t-messagebus" font-size="9" text-anchor="middle">WAITING... deadlock!</text>
+          <rect x="555" y="350" width="116" height="16" rx="3" class="c-mask"/>
+          <text x="613" y="360" class="t-messagebus" font-size="9" text-anchor="middle">WAITING... deadlock!</text>
         </g>
         </g>
 
         <g data-edge-from="db" data-edge-to="txnB" data-edge-label="DEADLOCK: ABORT B" data-edge-key="8" data-edge-id="deadlock-abort">
-          <path data-composition-edge-from="db" data-composition-edge-to="txnB" data-composition-edge-id="deadlock-abort" data-composition-points="271,400;177,400" d="M 271 400 L 177 400" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-composition-edge-from="db" data-composition-edge-to="txnB" data-composition-edge-id="deadlock-abort" data-composition-points="758,400;468,400" d="M 758 400 L 468 400" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         <g data-detail="context">
-          <rect x="173.8" y="380" width="100.4" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="390" class="t-backend" font-size="9" text-anchor="middle">DEADLOCK: ABORT B</text>
+          <rect x="562.8" y="380" width="100.4" height="16" rx="3" class="c-mask"/>
+          <text x="613" y="390" class="t-backend" font-size="9" text-anchor="middle">DEADLOCK: ABORT B</text>
         </g>
         </g>
 
         <g data-edge-from="db" data-edge-to="txnA" data-edge-label="LOCK Row 2 OK (B rolled back)" data-edge-key="9" data-edge-id="a-lock-row2-ok">
-          <path data-composition-edge-from="db" data-composition-edge-to="txnA" data-composition-edge-id="a-lock-row2-ok" data-composition-points="271,430;69,430" d="M 271 430 L 69 430" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+          <path data-composition-edge-from="db" data-composition-edge-to="txnA" data-composition-edge-id="a-lock-row2-ok" data-composition-points="758,430;164,430" d="M 758 430 L 164 430" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="88.6" y="410" width="162.8" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="420" class="t-muted" font-size="9" text-anchor="middle">LOCK Row 2 OK (B rolled back)</text>
+          <rect x="379.6" y="410" width="162.8" height="16" rx="3" class="c-mask"/>
+          <text x="461" y="420" class="t-muted" font-size="9" text-anchor="middle">LOCK Row 2 OK (B rolled back)</text>
         </g>
         </g>
 
         <g data-edge-from="txnA" data-edge-to="db" data-edge-label="COMMIT" data-edge-key="10" data-edge-id="a-commit">
-          <path data-composition-edge-from="txnA" data-composition-edge-to="db" data-composition-edge-id="a-commit" data-composition-points="69,460;271,460" d="M 69 460 L 271 460" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+          <path data-composition-edge-from="txnA" data-composition-edge-to="db" data-composition-edge-id="a-commit" data-composition-points="164,460;758,460" d="M 164 460 L 758 460" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="148.4" y="440" width="43.2" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="450" class="t-backend" font-size="9" text-anchor="middle">COMMIT</text>
+          <rect x="439.4" y="440" width="43.2" height="16" rx="3" class="c-mask"/>
+          <text x="461" y="450" class="t-backend" font-size="9" text-anchor="middle">COMMIT</text>
         </g>
         </g>
 
         <g data-edge-from="db" data-edge-to="txnA" data-edge-label="OK" data-edge-key="11" data-edge-id="a-commit-ok">
-          <path data-composition-edge-from="db" data-composition-edge-to="txnA" data-composition-edge-id="a-commit-ok" data-composition-points="271,490;69,490" d="M 271 490 L 69 490" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+          <path data-composition-edge-from="db" data-composition-edge-to="txnA" data-composition-edge-id="a-commit-ok" data-composition-points="758,490;164,490" d="M 758 490 L 164 490" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="153" y="470" width="34" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="480" class="t-muted" font-size="9" text-anchor="middle">OK</text>
+          <rect x="444" y="470" width="34" height="16" rx="3" class="c-mask"/>
+          <text x="461" y="480" class="t-muted" font-size="9" text-anchor="middle">OK</text>
         </g>
         </g>
 
         <!-- Segment Labels -->
         <g data-graph-role="segment-label" data-segment-id="0">
-          <rect x="56" y="101" width="154.4" height="18" rx="3" class="c-mask"/>
-          <text x="62" y="114" class="t-dim" font-size="9" font-weight="600">A and B lock different rows</text>
+          <rect x="56" y="123" width="154.4" height="18" rx="3" class="c-mask"/>
+          <text x="62" y="136" class="t-dim" font-size="9" font-weight="600">A and B lock different rows</text>
         </g>
         <g data-graph-role="segment-label" data-segment-id="1">
-          <rect x="56" y="155" width="248" height="18" rx="3" class="c-mask"/>
-          <text x="62" y="168" class="t-dim" font-size="9" font-weight="600">Circular wait: each waits on the other&#39;s lock</text>
+          <rect x="56" y="243" width="248" height="18" rx="3" class="c-mask"/>
+          <text x="62" y="256" class="t-dim" font-size="9" font-weight="600">Circular wait: each waits on the other&#39;s lock</text>
         </g>
         <g data-graph-role="segment-label" data-segment-id="2">
-          <rect x="56" y="275" width="253.20000000000002" height="18" rx="3" class="c-mask"/>
-          <text x="62" y="288" class="t-dim" font-size="9" font-weight="600">Deadlock detector picks a victim, rolls back B</text>
+          <rect x="56" y="363" width="253.20000000000002" height="18" rx="3" class="c-mask"/>
+          <text x="62" y="376" class="t-dim" font-size="9" font-weight="600">Deadlock detector picks a victim, rolls back B</text>
         </g>
         <g data-graph-role="segment-label" data-segment-id="3">
-          <rect x="56" y="335" width="128.4" height="18" rx="3" class="c-mask"/>
-          <text x="62" y="348" class="t-dim" font-size="9" font-weight="600">A proceeds and commits</text>
+          <rect x="56" y="401" width="128.4" height="18" rx="3" class="c-mask"/>
+          <text x="62" y="414" class="t-dim" font-size="9" font-weight="600">A proceeds and commits</text>
         </g>
 
         <!-- Participants -->
         <g id="node-txnA" data-node-id="txnA" data-node-label="Transaction A" tabindex="0" role="button" aria-label="Focus Transaction A, client session, Sequence participant" aria-pressed="false" data-node-kind="external" data-node-sublabel="client session" data-node-context="Sequence participant">
           <title>Transaction A · client session · Sequence participant</title>
-          <rect x="19" y="72" width="86" height="54" rx="6" class="c-mask"/>
-          <rect x="19" y="72" width="86" height="54" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(25 78) scale(0.6875)">
+          <rect x="62" y="72" width="190" height="54" rx="6" class="c-mask"/>
+          <rect x="62" y="72" width="190" height="54" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(68 78) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="62" y="94" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Transaction A</text>
-          <text data-detail="context" x="62" y="111" class="t-muted" font-size="7" text-anchor="middle">client session</text>
+          <text data-node-label="" data-detail-anchor="" x="157" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Transaction A</text>
+          <text data-detail="context" x="157" y="111" class="t-muted" font-size="7" text-anchor="middle">client session</text>
         </g>
 
         <g id="node-txnB" data-node-id="txnB" data-node-label="Transaction B" tabindex="0" role="button" aria-label="Focus Transaction B, client session, Sequence participant" aria-pressed="false" data-node-kind="external" data-node-sublabel="client session" data-node-context="Sequence participant">
           <title>Transaction B · client session · Sequence participant</title>
-          <rect x="127" y="72" width="86" height="54" rx="6" class="c-mask"/>
-          <rect x="127" y="72" width="86" height="54" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(133 78) scale(0.6875)">
+          <rect x="366" y="72" width="190" height="54" rx="6" class="c-mask"/>
+          <rect x="366" y="72" width="190" height="54" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(372 78) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="170" y="94" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Transaction B</text>
-          <text data-detail="context" x="170" y="111" class="t-muted" font-size="7" text-anchor="middle">client session</text>
+          <text data-node-label="" data-detail-anchor="" x="461" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Transaction B</text>
+          <text data-detail="context" x="461" y="111" class="t-muted" font-size="7" text-anchor="middle">client session</text>
         </g>
 
         <g id="node-db" data-node-id="db" data-node-label="Database" tabindex="0" role="button" aria-label="Focus Database, lock manager, Sequence participant" aria-pressed="false" data-node-kind="database" data-node-sublabel="lock manager" data-node-context="Sequence participant">
           <title>Database · lock manager · Sequence participant</title>
-          <rect x="235" y="72" width="86" height="54" rx="6" class="c-mask"/>
-          <rect x="235" y="72" width="86" height="54" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(241 78) scale(0.6875)">
+          <rect x="670" y="72" width="190" height="54" rx="6" class="c-mask"/>
+          <rect x="670" y="72" width="190" height="54" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(676 78) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="278" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Database</text>
-          <text data-detail="context" x="278" y="111" class="t-muted" font-size="7" text-anchor="middle">lock manager</text>
+          <text data-node-label="" data-detail-anchor="" x="765" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Database</text>
+          <text data-detail="context" x="765" y="111" class="t-muted" font-size="7" text-anchor="middle">lock manager</text>
         </g>
 
         <!-- Legend -->
