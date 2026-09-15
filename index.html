@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visual Knowledge Base</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --text: #1c1c1a;
+    --muted: #6b6b66;
+    --border: #e4e4e0;
+    --accent: #b45309;
+    --tag-bg: #fef3e2;
+    --tag-text: #92400e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #171715;
+      --card: #201f1c;
+      --text: #f2f1ed;
+      --muted: #a3a29c;
+      --border: #34332e;
+      --accent: #f0b429;
+      --tag-bg: #3a2c12;
+      --tag-text: #f0b429;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding-block: 3rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding-inline: 1.25rem;
+  }
+  header {
+    margin-bottom: 2.5rem;
+  }
+  h1 {
+    font-size: 1.9rem;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  header p {
+    color: var(--muted);
+    margin: 0;
+    max-width: 60ch;
+  }
+  header a {
+    color: var(--accent);
+  }
+  .card {
+    display: block;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 0.9rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .card h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+  }
+  .card .desc {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin: 0 0 0.6rem;
+  }
+  .meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 0.78rem;
+  }
+  .tag {
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .src {
+    color: var(--muted);
+  }
+  .src a { color: var(--muted); }
+  footer {
+    margin-top: 2.5rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Visual Knowledge Base</h1>
+    <p>Kho tổng hợp kiến thức kỹ thuật dưới dạng diagram trực quan (architecture, sequence, workflow, dataflow, lifecycle), dựng bằng <a href="https://github.com/tt-a1i/archify" target="_blank" rel="noopener">archify</a>. Xem mã nguồn tại <a href="https://github.com/Rockship-Team/visual-knowledge-base" target="_blank" rel="noopener">GitHub</a>.</p>
+  </header>
+
+  <main id="catalog">
+    <a class="card" href="diagrams/race-condition-lost-update/diagram.html">
+      <h2>Race Condition: Lost Update</h2>
+      <p class="desc">Hai client cùng đọc-tính-ghi số dư tài khoản mà không đồng bộ, khiến một lần cập nhật bị mất.</p>
+      <div class="meta">
+        <span class="tag">sequence</span>
+        <span class="src"><a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/race-condition-lost-update" target="_blank" rel="noopener">nguồn + giải thích</a></span>
+      </div>
+    </a>
+  </main>
+
+  <footer>
+    Muốn đóng góp chủ đề mới? Xem <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">CONTRIBUTING.md</a>.
+  </footer>
+</div>
+</body>
+</html>
