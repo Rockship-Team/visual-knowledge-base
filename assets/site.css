@@ -81,6 +81,27 @@ a { color: var(--accent); }
   margin-left: 1.1rem;
 }
 .site-header nav a:hover { color: var(--accent); }
+.lang-switch {
+  display: inline-flex;
+  gap: 0.3rem;
+  margin-left: 1.1rem;
+}
+.lang-switch button {
+  border: 1px solid var(--border);
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.lang-switch button[aria-pressed="true"] {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
+  border-color: var(--pill-active-bg);
+}
 .site-header .tagline {
   color: var(--muted);
   font-size: 0.92rem;

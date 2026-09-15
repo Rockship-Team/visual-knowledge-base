@@ -1,26 +1,34 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Leader Election: Raft Consensus — Visual Knowledge Base</title>
+<title>Leader Election: Raft Consensus Basics — Visual Knowledge Base</title>
 <link rel="stylesheet" href="../../assets/site.css">
 </head>
 <body>
 <header class="site-header">
   <div class="wrap">
-    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
     <div class="row">
       <a class="brand" href="../../">Visual Knowledge Base</a>
       <nav>
-        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/leader-election-raft" target="_blank" rel="noopener">Xem trên GitHub</a>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/leader-election-raft" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
       </nav>
     </div>
   </div>
 </header>
 
 <main class="wrap">
-  <h1 class="topic-title">Leader Election: Raft Consensus cơ bản</h1>
+  <h1 class="topic-title">Leader Election: Raft Consensus Basics</h1>
   <div class="topic-meta">
     <span class="badge">lifecycle</span>
     <span class="tag">distributed-systems</span>
@@ -30,13 +38,48 @@
 
   <div class="diagram-block">
     <div class="bar">
-      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
-      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
     </div>
     <iframe src="diagram.html" title="Raft leader election lifecycle diagram" loading="lazy"></iframe>
   </div>
 
-  <div class="prose">
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>In a distributed system, multiple nodes need to agree on <strong>a single leader</strong> to avoid write conflicts. Raft solves this with a simple state machine: <strong>Follower → Candidate → Leader</strong>, driven by majority voting (quorum).</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Follower</strong> is the default state: the node passively waits for heartbeats from the current leader</li>
+      <li>If the <strong>election timeout</strong> elapses with no heartbeat received, a Follower turns itself into a <strong>Candidate</strong>: it increments the term, votes for itself, and requests votes from the other nodes</li>
+      <li>If the Candidate <strong>wins a majority of votes (quorum)</strong>, it becomes <strong>Leader</strong> and starts sending periodic heartbeats to hold power</li>
+      <li>If a <strong>split vote</strong> happens (no one reaches a majority), the Candidate reverts to Follower, waits for a new randomized election timeout, and tries again</li>
+      <li>If a Leader discovers another node with a <strong>higher term</strong> (for example, after a network partition heals), it immediately <strong>steps down</strong> to Follower</li>
+    </ol>
+    <p class="callout">There can be at most <strong>one valid Leader per term</strong>, because winning requires a majority of votes — this is exactly what makes Raft resistant to split-brain.</p>
+
+    <h2>Why Randomized Timeouts</h2>
+    <ul>
+      <li>If every node used the same fixed election timeout, many nodes could become Candidates at the same moment and keep splitting the vote, never converging</li>
+      <li>Raft draws a random timeout from a range for each node, so almost always one Candidate starts its election first and collects enough votes before any other node times out</li>
+    </ul>
+
+    <h2>The Role of Heartbeats</h2>
+    <ul>
+      <li>The Leader sends heartbeats (empty AppendEntries) periodically to every Follower</li>
+      <li>As long as a Follower keeps receiving heartbeats regularly, it never times out and never starts a new election</li>
+      <li>Heartbeats stopping (leader crashed, network lost, …) is the only signal the cluster needs to know a new election is required</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/leader-election-raft/spec.lifecycle.json" target="_blank" rel="noopener">spec.lifecycle.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate lifecycle path/to/spec.lifecycle.json --quality showcase --json
+node bin/archify.mjs deliver lifecycle path/to/spec.lifecycle.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
     <h2>Tóm tắt</h2>
     <p>Trong một hệ phân tán, nhiều node cần thống nhất chọn ra <strong>một leader duy nhất</strong> để tránh xung đột khi ghi dữ liệu. Raft giải quyết bài toán này bằng một state machine đơn giản: <strong>Follower → Candidate → Leader</strong>, dựa trên bỏ phiếu đa số (quorum).</p>
 
@@ -74,8 +117,9 @@ node bin/archify.mjs deliver lifecycle path/to/spec.lifecycle.json path/to/diagr
 
 <footer class="site-footer">
   <div class="wrap">
-    <a href="../../">← Quay lại danh mục</a>
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
   </div>
 </footer>
+<script src="../../assets/i18n.js"></script>
 </body>
 </html>

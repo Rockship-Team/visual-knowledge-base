@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,18 +9,26 @@
 <body>
 <header class="site-header">
   <div class="wrap">
-    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
     <div class="row">
       <a class="brand" href="../../">Visual Knowledge Base</a>
       <nav>
-        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/cap-theorem" target="_blank" rel="noopener">Xem trên GitHub</a>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/cap-theorem" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
       </nav>
     </div>
   </div>
 </header>
 
 <main class="wrap">
-  <h1 class="topic-title">CAP Theorem: Consistency vs Availability khi Network Partition</h1>
+  <h1 class="topic-title">CAP Theorem: Consistency vs Availability During a Network Partition</h1>
   <div class="topic-meta">
     <span class="badge">workflow</span>
     <span class="tag">distributed-systems</span>
@@ -30,13 +38,43 @@
 
   <div class="diagram-block">
     <div class="bar">
-      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
-      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
     </div>
     <iframe src="diagram.html" title="CAP theorem workflow diagram" loading="lazy"></iframe>
   </div>
 
-  <div class="prose">
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>The <strong>CAP theorem</strong> says a distributed data system cannot simultaneously guarantee all three properties: <strong>C</strong>onsistency (every node returns the same, most recent data), <strong>A</strong>vailability (every request still gets a response, no error), and <strong>P</strong>artition tolerance (the system keeps working when the network between nodes is split). In practice, Partition tolerance is essentially unavoidable — the network will fail sometimes — so the real question isn't "pick one of three", it's <strong>choosing C or A when a partition happens</strong>.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li>Normally: the client reads/writes through <strong>Node A</strong> and <strong>Node B</strong>, and the two nodes stay continuously in sync</li>
+      <li>A <strong>Network Partition</strong> happens: Node A and Node B lose connection to each other, but both still receive requests from the client</li>
+      <li>The client sends a read request to Node B during the partition — the system must pick one of two branches:</li>
+      <li><strong>CP branch</strong>: Node B refuses to answer or returns an error because it can't confirm it has the latest data from Node A → stays Consistent, sacrifices Availability</li>
+      <li><strong>AP branch</strong>: Node B answers anyway with its local data, which may be stale → stays Available, sacrifices Consistency</li>
+      <li>Once the partition is fixed, the two nodes re-sync (reconcile)</li>
+    </ol>
+    <p class="callout">P isn't a choice — the network will partition eventually. What engineers actually decide is what the system does <strong>when</strong> it happens: refuse to serve to stay correct, or serve anyway with data that might be stale.</p>
+
+    <h2>Real-World Examples</h2>
+    <ul>
+      <li>Systems leaning <strong>CP</strong>: consensus-based systems like etcd, ZooKeeper, or RDBMSs with strong consistency — prioritize correct data over always answering</li>
+      <li>Systems leaning <strong>AP</strong>: Cassandra, DynamoDB-style eventual consistency — prioritize always responding, accepting data that may briefly disagree across nodes</li>
+      <li>Many modern systems let you tune consistency per-operation (e.g. per-query consistency level in Cassandra) instead of locking the whole system to one side</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/cap-theorem/spec.workflow.json" target="_blank" rel="noopener">spec.workflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate workflow path/to/spec.workflow.json --quality showcase --json
+node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
     <h2>Tóm tắt</h2>
     <p><strong>CAP theorem</strong> nói rằng một hệ thống dữ liệu phân tán không thể đồng thời đảm bảo cả 3 tính chất: <strong>C</strong>onsistency (mọi node trả về dữ liệu mới nhất giống nhau), <strong>A</strong>vailability (mọi request đều nhận được response, không lỗi), và <strong>P</strong>artition tolerance (hệ thống vẫn hoạt động khi mạng giữa các node bị chia cắt). Trong thực tế, Partition tolerance gần như bắt buộc phải chấp nhận — mạng sẽ luôn có lúc lỗi — nên câu hỏi thật sự không phải "chọn cái nào trong 3 cái", mà là <strong>chọn C hay A khi partition xảy ra</strong>.</p>
 
@@ -69,8 +107,9 @@ node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram
 
 <footer class="site-footer">
   <div class="wrap">
-    <a href="../../">← Quay lại danh mục</a>
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
   </div>
 </footer>
+<script src="../../assets/i18n.js"></script>
 </body>
 </html>

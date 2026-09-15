@@ -32,7 +32,10 @@
   }
 
   if (typePills) {
-    typePills.appendChild(makePill("all", "Tất cả"));
+    var allPill = makePill("all", "All");
+    allPill.setAttribute("data-label-en", "All");
+    allPill.setAttribute("data-label-vi", "Tất cả");
+    typePills.appendChild(allPill);
     types.forEach(function (t) {
       typePills.appendChild(makePill(t, t));
     });

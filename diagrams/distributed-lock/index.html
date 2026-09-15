@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,11 +9,19 @@
 <body>
 <header class="site-header">
   <div class="wrap">
-    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
     <div class="row">
       <a class="brand" href="../../">Visual Knowledge Base</a>
       <nav>
-        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/distributed-lock" target="_blank" rel="noopener">Xem trên GitHub</a>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/distributed-lock" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
       </nav>
     </div>
   </div>
@@ -30,13 +38,48 @@
 
   <div class="diagram-block">
     <div class="bar">
-      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
-      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
     </div>
     <iframe src="diagram.html" title="Distributed lock sequence diagram" loading="lazy"></iframe>
   </div>
 
-  <div class="prose">
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>A distributed lock (using Redis <code>SET NX PX</code>) is the correct fix for the <a href="../race-condition-lost-update/">Lost Update</a> race condition: it guarantees only one instance runs the critical section at a time.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Instance A</strong> sends <code>SET lock token=A NX PX 5000</code> to Redis → succeeds, holds the lock</li>
+      <li><strong>Instance B</strong> also tries <code>SET lock token=B NX</code> → Redis rejects it because the key already exists → B retries (backoff)</li>
+      <li>A runs the critical section (<code>UPDATE balance = balance + 50</code>), then releases the lock with a script that only deletes it <strong>if the token still matches token=A</strong></li>
+      <li>B retries again, this time acquires successfully → only now does B run its own critical section</li>
+    </ol>
+    <p class="callout">Result: the two instances never run the critical section at the same time — no more overlapping read-modify-write.</p>
+
+    <h2>Requirements for a Correct Distributed Lock</h2>
+    <ul>
+      <li><strong>TTL/PX is mandatory</strong>: if the lock holder crashes, the lock expires automatically instead of blocking forever (deadlock)</li>
+      <li><strong>Unique token per acquire</strong>: only delete the lock if the token still matches, to avoid deleting another instance's lock after its own TTL has expired</li>
+      <li><strong>Atomic check-and-delete</strong>: the "check token, then delete" operation must run inside a Lua script, otherwise it becomes a race condition of its own</li>
+    </ul>
+
+    <h2>Known Limitations</h2>
+    <ul>
+      <li>Redlock (using multiple Redis nodes for extra reliability) is still debated for safety when system clocks or the network aren't ideal (Martin Kleppmann, "How to do distributed locking," 2016)</li>
+      <li>For high-correctness requirements (e.g. finance), combine it with a <strong>fencing token</strong> on the protected resource, not just the lock</li>
+      <li>With a single Redis instance, this remains a simple solution that's good enough for most real-world use cases</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/distributed-lock/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
     <h2>Tóm tắt</h2>
     <p>Distributed lock (dùng Redis <code>SET NX PX</code>) là cách khắc phục đúng cho race condition kiểu <a href="../race-condition-lost-update/">Lost Update</a>: đảm bảo chỉ một instance được chạy critical section tại một thời điểm.</p>
 
@@ -74,8 +117,9 @@ node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram
 
 <footer class="site-footer">
   <div class="wrap">
-    <a href="../../">← Quay lại danh mục</a>
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
   </div>
 </footer>
+<script src="../../assets/i18n.js"></script>
 </body>
 </html>

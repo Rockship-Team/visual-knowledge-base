@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,11 +9,19 @@
 <body>
 <header class="site-header">
   <div class="wrap">
-    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
     <div class="row">
       <a class="brand" href="../../">Visual Knowledge Base</a>
       <nav>
-        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/race-condition-lost-update" target="_blank" rel="noopener">Xem trên GitHub</a>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/race-condition-lost-update" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
       </nav>
     </div>
   </div>
@@ -30,13 +38,49 @@
 
   <div class="diagram-block">
     <div class="bar">
-      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
-      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
     </div>
     <iframe src="diagram.html" title="Race condition lost update sequence diagram" loading="lazy"></iframe>
   </div>
 
-  <div class="prose">
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Illustrates a <strong>Lost Update</strong> race condition on an account balance, where two clients read-modify-write concurrently with no synchronization mechanism.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Client A</strong> reads <code>balance = 100</code> → computes <code>100 + 50 = 150</code></li>
+      <li>Before A writes, <strong>Client B</strong> also reads <code>balance = 100</code> (the old, not-yet-updated value) → also computes <code>150</code></li>
+      <li>A writes <code>balance = 150</code> (correct at that moment)</li>
+      <li>B overwrites with <code>balance = 150</code> — it should have been <code>200</code>, since both deposits of 50 need to be counted</li>
+    </ol>
+    <p class="callout">Final result: <strong>150 instead of 200</strong> — A's update is silently lost.</p>
+
+    <h2>Root Cause</h2>
+    <ul>
+      <li>The "read → compute → write" operation is three separate steps, not atomic</li>
+      <li>No lock or isolation control between the two concurrent transactions</li>
+      <li>The interleaving order is decided by the scheduler and is unpredictable — the outcome depends on timing, not logic</li>
+    </ul>
+
+    <h2>How to Fix It</h2>
+    <ul>
+      <li><strong>Atomic update</strong> at the DB: <code>UPDATE balance = balance + 50</code> instead of read-then-compute-then-write</li>
+      <li><strong>Optimistic locking</strong>: add a <code>version</code> column, only write if the version still matches, otherwise retry</li>
+      <li><strong>Pessimistic locking</strong>: <code>SELECT ... FOR UPDATE</code>, or a mutex/semaphore at the application layer</li>
+      <li><strong>Serializable isolation level</strong> so the DB detects and rejects the conflicting transaction itself</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/race-condition-lost-update/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
     <h2>Tóm tắt</h2>
     <p>Minh họa race condition kiểu <strong>Lost Update</strong> trên số dư tài khoản, khi hai client cùng đọc-tính-ghi (read-modify-write) mà không có cơ chế đồng bộ.</p>
 
@@ -75,8 +119,9 @@ node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram
 
 <footer class="site-footer">
   <div class="wrap">
-    <a href="../../">← Quay lại danh mục</a>
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
   </div>
 </footer>
+<script src="../../assets/i18n.js"></script>
 </body>
 </html>

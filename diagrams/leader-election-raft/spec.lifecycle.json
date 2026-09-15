@@ -2,42 +2,42 @@
   "schema_version": 1,
   "diagram_type": "lifecycle",
   "meta": {
-    "title": "Leader Election: Raft Consensus co ban",
+    "title": "Leader Election: Raft Consensus Basics",
     "output": "leader-election-raft.html",
     "viewBox": [1000, 600],
     "quality_profile": "showcase"
   },
   "lanes": [
-    { "id": "main", "label": "Trang thai node" }
+    { "id": "main", "label": "Node state" }
   ],
   "states": [
-    { "id": "follower", "type": "start", "label": "Follower", "sublabel": "cho heartbeat", "lane": "main", "col": 0, "step": "01", "tag": "entry" },
-    { "id": "candidate", "type": "decision", "label": "Candidate", "sublabel": "yeu cau bo phieu", "lane": "main", "col": 1, "step": "02", "tag": "election" },
-    { "id": "leader", "type": "success", "label": "Leader", "sublabel": "gui heartbeat dinh ky", "lane": "main", "col": 2, "step": "03", "tag": "leader" }
+    { "id": "follower", "type": "start", "label": "Follower", "sublabel": "waiting for heartbeat", "lane": "main", "col": 0, "step": "01", "tag": "entry" },
+    { "id": "candidate", "type": "decision", "label": "Candidate", "sublabel": "requesting votes", "lane": "main", "col": 1, "step": "02", "tag": "election" },
+    { "id": "leader", "type": "success", "label": "Leader", "sublabel": "sending periodic heartbeats", "lane": "main", "col": 2, "step": "03", "tag": "leader" }
   ],
   "transitions": [
     { "id": "follower-to-candidate", "from": "follower", "to": "candidate", "label": "election timeout", "variant": "default", "fromSide": "right", "toSide": "left", "route": "straight", "labelAt": [171, 122] },
-    { "id": "candidate-to-leader", "from": "candidate", "to": "leader", "label": "thang da so phieu", "variant": "emphasis", "fromSide": "right", "toSide": "left", "route": "straight", "labelAt": [325, 122] },
-    { "id": "candidate-to-follower", "from": "candidate", "to": "follower", "label": "chia phieu, bau lai voi term moi", "variant": "security", "fromSide": "bottom", "toSide": "bottom", "route": "bottom-channel", "channelY": 250 },
-    { "id": "leader-to-follower", "from": "leader", "to": "follower", "label": "step down (term cao hon)", "variant": "security", "route": "top-channel", "channelY": 60, "fromSide": "top", "toSide": "top" }
+    { "id": "candidate-to-leader", "from": "candidate", "to": "leader", "label": "wins majority vote", "variant": "emphasis", "fromSide": "right", "toSide": "left", "route": "straight", "labelAt": [325, 122] },
+    { "id": "candidate-to-follower", "from": "candidate", "to": "follower", "label": "split vote, re-elect with new term", "variant": "security", "fromSide": "bottom", "toSide": "bottom", "route": "bottom-channel", "channelY": 250 },
+    { "id": "leader-to-follower", "from": "leader", "to": "follower", "label": "step down (higher term seen)", "variant": "security", "route": "top-channel", "channelY": 60, "fromSide": "top", "toSide": "top" }
   ],
   "cards": [
     {
       "dot": "emerald",
       "title": "Main Path + Quorum",
       "items": [
-        "Follower chi tro thanh Candidate khi het election timeout ma khong nhan duoc heartbeat",
-        "Candidate can da so phieu (quorum) tuyet doi de tro thanh Leader duy nhat trong term",
-        "Da so (majority) dam bao khong the co 2 Leader hop le trong cung mot term -> chong split-brain"
+        "A Follower only becomes a Candidate when its election timeout elapses with no heartbeat received",
+        "A Candidate needs an absolute majority of votes (quorum) to become the sole Leader for that term",
+        "The majority requirement guarantees at most one valid Leader per term -> prevents split-brain"
       ]
     },
     {
       "dot": "rose",
       "title": "Retry + Step Down",
       "items": [
-        "Split vote (chia phieu) khien Candidate quay lai Follower, cho election timeout ngau nhien moi roi thu lai",
-        "Random timeout giup tranh nhieu node cung retry dong thoi va chia phieu lien tuc",
-        "Leader tu step down ve Follower ngay khi thay mot term cao hon tu peer khac"
+        "A split vote sends the Candidate back to Follower, where it waits for a new randomized timeout before retrying",
+        "Randomized timeouts keep many nodes from retrying at once and repeatedly splitting the vote",
+        "A Leader steps down to Follower as soon as it sees a higher term from another peer"
       ]
     }
   ]

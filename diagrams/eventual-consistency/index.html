@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,11 +9,19 @@
 <body>
 <header class="site-header">
   <div class="wrap">
-    <a class="breadcrumb" href="../../">← Tất cả chủ đề</a>
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
     <div class="row">
       <a class="brand" href="../../">Visual Knowledge Base</a>
       <nav>
-        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/eventual-consistency" target="_blank" rel="noopener">Xem trên GitHub</a>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/eventual-consistency" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
       </nav>
     </div>
   </div>
@@ -30,13 +38,49 @@
 
   <div class="diagram-block">
     <div class="bar">
-      <span>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span>
-      <a href="diagram.html" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
     </div>
     <iframe src="diagram.html" title="Eventual consistency read-your-writes dataflow diagram" loading="lazy"></iframe>
   </div>
 
-  <div class="prose">
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Illustrates the <strong>read-your-writes anomaly</strong> in a system using <strong>eventual consistency</strong>: a client writes successfully, but an immediate read can still see stale data, because replication between nodes is asynchronous and lags.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Client</strong> writes new data (<code>PUT /profile</code>) to the <strong>Primary DB</strong>. Primary ACKs immediately, without waiting for replication to finish.</li>
+      <li>Primary <strong>replicates asynchronously</strong> to <strong>Replica 1</strong> and <strong>Replica 2</strong>.</li>
+      <li>Replica 1 catches up in time → a client reading from Replica 1 <strong>afterwards</strong> sees the fresh data.</li>
+      <li>Replica 2 lags behind → if a client reads from Replica 2 <strong>right after the write</strong>, it gets stale data back.</li>
+    </ol>
+    <p class="callout">This is called the <strong>read-your-writes anomaly</strong>: the write succeeded, but a read right after it doesn't see the change you just made — a side effect of replication lag, not a logic bug.</p>
+
+    <h2>Root Cause</h2>
+    <ul>
+      <li>Asynchronous replication is a <strong>deliberate trade-off</strong>: it buys lower write latency and higher availability for the system</li>
+      <li>Every replica converges to the same value after some delay (that's what "eventually consistent" means), but during that window replicas can disagree</li>
+      <li>The problem shows up more often when a load balancer routes a client's consecutive read/write requests to different replicas</li>
+    </ul>
+
+    <h2>How to Guarantee Read-Your-Writes</h2>
+    <ul>
+      <li><strong>Sticky session</strong>: after a client writes, route its subsequent reads back to Primary for a short window</li>
+      <li><strong>Read from Primary</strong> for the request immediately following a write, only switching to replica reads once the replication lag has surely passed</li>
+      <li><strong>Session/causal consistency</strong>: the server remembers the version the client just wrote; a replica only answers once it has caught up to that version</li>
+      <li><strong>Versioned reads</strong>: the client sends the version it wrote; the replica refuses/delays its answer until it has caught up</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/eventual-consistency/spec.dataflow.json" target="_blank" rel="noopener">spec.dataflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate dataflow path/to/spec.dataflow.json --quality showcase --json
+node bin/archify.mjs deliver dataflow path/to/spec.dataflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
     <h2>Tóm tắt</h2>
     <p>Minh họa hiện tượng <strong>read-your-writes anomaly</strong> trong một hệ thống dùng <strong>eventual consistency</strong>: client ghi xong nhưng đọc lại ngay lập tức có thể vẫn thấy dữ liệu cũ, vì replication giữa các node là bất đồng bộ và có độ trễ.</p>
 
@@ -75,8 +119,9 @@ node bin/archify.mjs deliver dataflow path/to/spec.dataflow.json path/to/diagram
 
 <footer class="site-footer">
   <div class="wrap">
-    <a href="../../">← Quay lại danh mục</a>
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
   </div>
 </footer>
+<script src="../../assets/i18n.js"></script>
 </body>
 </html>

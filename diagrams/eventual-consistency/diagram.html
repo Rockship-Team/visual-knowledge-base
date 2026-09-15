@@ -5157,27 +5157,27 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
         <!-- Data Stages -->
         <rect data-graph-role="structural-frame" data-composition-frame-kind="stage" data-composition-frame-id="0" x="16" y="46" width="168" height="520" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="100" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">01 / Ghi (Write)</text>
+        <text x="100" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">01 / Write</text>
 
         <rect data-graph-role="structural-frame" data-composition-frame-kind="stage" data-composition-frame-id="1" x="231" y="46" width="168" height="520" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="315" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">02 / Nguon ghi (Primary)</text>
+        <text x="315" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">02 / Primary</text>
 
         <rect data-graph-role="structural-frame" data-composition-frame-kind="stage" data-composition-frame-id="2" x="446" y="46" width="168" height="520" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="530" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">03 / Ban sao (Replicas)</text>
+        <text x="530" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">03 / Replicas</text>
 
         <rect data-graph-role="structural-frame" data-composition-frame-kind="stage" data-composition-frame-id="3" x="661" y="46" width="168" height="520" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="745" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">04 / Doc (Read)</text>
+        <text x="745" y="68" class="t-dim" font-size="9" font-weight="600" text-anchor="middle">04 / Read</text>
 
         <!-- Flow paths -->
         <path data-edge-from="client_write" data-edge-to="primary" data-edge-label="PUT /profile" data-edge-key="0" data-edge-id="write-req" data-composition-points="156,271;259,271" d="M 156 271 L 259 271" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         <path data-edge-from="primary" data-edge-to="replica1" data-edge-label="replicate (async)" data-edge-key="1" data-edge-id="replicate-ok" data-composition-points="371,271;415,271;415,157;474,157" d="M 371 271 L 415 271 L 415 157 L 474 157" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="primary" data-edge-to="replica2" data-edge-label="replicate (async, tre)" data-edge-key="2" data-edge-id="replicate-lag" data-composition-points="371,271;415,271;415,385;474,385" d="M 371 271 L 415 271 L 415 385 L 474 385" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="replica1" data-edge-to="read_fresh" data-edge-label="GET /profile - du lieu moi" data-edge-key="3" data-edge-id="read-fresh-req" data-composition-points="586,157;689,157" d="M 586 157 L 689 157" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="replica2" data-edge-to="read_stale" data-edge-label="GET /profile - du lieu cu" data-edge-key="4" data-edge-id="read-stale-req" data-composition-points="586,385;689,385" d="M 586 385 L 689 385" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="primary" data-edge-to="replica2" data-edge-label="replicate (async, delayed)" data-edge-key="2" data-edge-id="replicate-lag" data-composition-points="371,271;415,271;415,385;474,385" d="M 371 271 L 415 271 L 415 385 L 474 385" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="replica1" data-edge-to="read_fresh" data-edge-label="GET /profile - fresh data" data-edge-key="3" data-edge-id="read-fresh-req" data-composition-points="586,157;689,157" d="M 586 157 L 689 157" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="replica2" data-edge-to="read_stale" data-edge-label="GET /profile - stale data" data-edge-key="4" data-edge-id="read-stale-req" data-composition-points="586,385;689,385" d="M 586 385 L 689 385" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
 
         <!-- Nodes -->
-        <g id="node-client_write" data-node-id="client_write" data-node-label="Client" tabindex="0" role="button" aria-label="Focus Client, ghi du lieu moi, 01 / Ghi (Write)" aria-pressed="false" data-node-kind="external" data-node-sublabel="ghi du lieu moi" data-node-context="01 / Ghi (Write)">
-          <title>Client · ghi du lieu moi · 01 / Ghi (Write)</title>
+        <g id="node-client_write" data-node-id="client_write" data-node-label="Client" tabindex="0" role="button" aria-label="Focus Client, writes new data, 01 / Write" aria-pressed="false" data-node-kind="external" data-node-sublabel="writes new data" data-node-context="01 / Write">
+          <title>Client · writes new data · 01 / Write</title>
           <rect x="44" y="242" width="112" height="58" rx="6" class="c-mask"/>
           <rect x="44" y="242" width="112" height="58" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(50 248) scale(0.6875)">
@@ -5185,11 +5185,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="100" y="263" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Client</text>
-          <text data-detail="context" x="100" y="279" class="t-muted" font-size="7" text-anchor="middle">ghi du lieu moi</text>
+          <text data-detail="context" x="100" y="279" class="t-muted" font-size="7" text-anchor="middle">writes new data</text>
         </g>
 
-        <g id="node-primary" data-node-id="primary" data-node-label="Primary DB" tabindex="0" role="button" aria-label="Focus Primary DB, nguon ghi, ACK ngay, 02 / Nguon ghi (Primary)" aria-pressed="false" data-node-kind="database" data-node-sublabel="nguon ghi, ACK ngay" data-node-context="02 / Nguon ghi (Primary)">
-          <title>Primary DB · nguon ghi, ACK ngay · 02 / Nguon ghi (Primary)</title>
+        <g id="node-primary" data-node-id="primary" data-node-label="Primary DB" tabindex="0" role="button" aria-label="Focus Primary DB, source of truth, 02 / Primary" aria-pressed="false" data-node-kind="database" data-node-sublabel="source of truth" data-node-context="02 / Primary">
+          <title>Primary DB · source of truth · 02 / Primary</title>
           <rect x="259" y="242" width="112" height="58" rx="6" class="c-mask"/>
           <rect x="259" y="242" width="112" height="58" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(265 248) scale(0.6875)">
@@ -5197,11 +5197,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="315" y="263" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Primary DB</text>
-          <text data-detail="context" x="315" y="279" class="t-muted" font-size="7" text-anchor="middle">nguon ghi, ACK ngay</text>
+          <text data-detail="context" x="315" y="279" class="t-muted" font-size="7" text-anchor="middle">source of truth</text>
         </g>
 
-        <g id="node-replica1" data-node-id="replica1" data-node-label="Replica 1" tabindex="0" role="button" aria-label="Focus Replica 1, da nhan replicate, 03 / Ban sao (Replicas)" aria-pressed="false" data-node-kind="database" data-node-sublabel="da nhan replicate" data-node-context="03 / Ban sao (Replicas)">
-          <title>Replica 1 · da nhan replicate · 03 / Ban sao (Replicas)</title>
+        <g id="node-replica1" data-node-id="replica1" data-node-label="Replica 1" tabindex="0" role="button" aria-label="Focus Replica 1, replication caught up, 03 / Replicas" aria-pressed="false" data-node-kind="database" data-node-sublabel="replication caught up" data-node-context="03 / Replicas">
+          <title>Replica 1 · replication caught up · 03 / Replicas</title>
           <rect x="474" y="128" width="112" height="58" rx="6" class="c-mask"/>
           <rect x="474" y="128" width="112" height="58" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(480 134) scale(0.6875)">
@@ -5209,11 +5209,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="530" y="149" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Replica 1</text>
-          <text data-detail="context" x="530" y="165" class="t-muted" font-size="7" text-anchor="middle">da nhan replicate</text>
+          <text data-detail="context" x="530" y="165" class="t-muted" font-size="7" text-anchor="middle">replication caught up</text>
         </g>
 
-        <g id="node-replica2" data-node-id="replica2" data-node-label="Replica 2" tabindex="0" role="button" aria-label="Focus Replica 2, chua nhan kip (lag), 03 / Ban sao (Replicas)" aria-pressed="false" data-node-kind="database" data-node-sublabel="chua nhan kip (lag)" data-node-context="03 / Ban sao (Replicas)">
-          <title>Replica 2 · chua nhan kip (lag) · 03 / Ban sao (Replicas)</title>
+        <g id="node-replica2" data-node-id="replica2" data-node-label="Replica 2" tabindex="0" role="button" aria-label="Focus Replica 2, replication lagging, 03 / Replicas" aria-pressed="false" data-node-kind="database" data-node-sublabel="replication lagging" data-node-context="03 / Replicas">
+          <title>Replica 2 · replication lagging · 03 / Replicas</title>
           <rect x="474" y="356" width="112" height="58" rx="6" class="c-mask"/>
           <rect x="474" y="356" width="112" height="58" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(480 362) scale(0.6875)">
@@ -5221,31 +5221,31 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="530" y="377" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Replica 2</text>
-          <text data-detail="context" x="530" y="393" class="t-muted" font-size="7" text-anchor="middle">chua nhan kip (lag)</text>
+          <text data-detail="context" x="530" y="393" class="t-muted" font-size="7" text-anchor="middle">replication lagging</text>
         </g>
 
-        <g id="node-read_fresh" data-node-id="read_fresh" data-node-label="Client - doc sau" tabindex="0" role="button" aria-label="Focus Client - doc sau, nhan du lieu moi, 04 / Doc (Read)" aria-pressed="false" data-node-kind="external" data-node-sublabel="nhan du lieu moi" data-node-context="04 / Doc (Read)">
-          <title>Client - doc sau · nhan du lieu moi · 04 / Doc (Read)</title>
+        <g id="node-read_fresh" data-node-id="read_fresh" data-node-label="Client (later)" tabindex="0" role="button" aria-label="Focus Client (later), gets fresh data, 04 / Read" aria-pressed="false" data-node-kind="external" data-node-sublabel="gets fresh data" data-node-context="04 / Read">
+          <title>Client (later) · gets fresh data · 04 / Read</title>
           <rect x="689" y="128" width="112" height="58" rx="6" class="c-mask"/>
           <rect x="689" y="128" width="112" height="58" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(695 134) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="745" y="149" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Client - doc sau</text>
-          <text data-detail="context" x="745" y="165" class="t-muted" font-size="7" text-anchor="middle">nhan du lieu moi</text>
+          <text data-node-label="" data-detail-anchor="" x="745" y="149" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Client (later)</text>
+          <text data-detail="context" x="745" y="165" class="t-muted" font-size="7" text-anchor="middle">gets fresh data</text>
         </g>
 
-        <g id="node-read_stale" data-node-id="read_stale" data-node-label="Client - doc ngay" tabindex="0" role="button" aria-label="Focus Client - doc ngay, nhan du lieu cu (stale), 04 / Doc (Read)" aria-pressed="false" data-node-kind="external" data-node-sublabel="nhan du lieu cu (stale)" data-node-context="04 / Doc (Read)">
-          <title>Client - doc ngay · nhan du lieu cu (stale) · 04 / Doc (Read)</title>
+        <g id="node-read_stale" data-node-id="read_stale" data-node-label="Client (immediate)" tabindex="0" role="button" aria-label="Focus Client (immediate), gets stale data, 04 / Read" aria-pressed="false" data-node-kind="external" data-node-sublabel="gets stale data" data-node-context="04 / Read">
+          <title>Client (immediate) · gets stale data · 04 / Read</title>
           <rect x="689" y="356" width="112" height="58" rx="6" class="c-mask"/>
           <rect x="689" y="356" width="112" height="58" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(695 362) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="745" y="377" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Client - doc ngay</text>
-          <text data-detail="context" x="745" y="393" class="t-muted" font-size="7" text-anchor="middle">nhan du lieu cu (stale)</text>
+          <text data-node-label="" data-detail-anchor="" x="745" y="377" class="t-primary" font-size="9.6" font-weight="600" text-anchor="middle">Client (immediate)</text>
+          <text data-detail="context" x="745" y="393" class="t-muted" font-size="7" text-anchor="middle">gets stale data</text>
         </g>
 
         <!-- Flow labels -->
@@ -5257,17 +5257,17 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <rect x="367.35" y="193" width="95.3" height="16" rx="4" class="c-mask"/>
           <text x="415" y="204" class="t-muted" font-size="8" text-anchor="middle">replicate (async)</text>
         </g>
-        <g data-detail="context" data-edge-from="primary" data-edge-to="replica2" data-edge-label="replicate (async, tre)" data-edge-key="2" data-edge-id="replicate-lag">
-          <rect x="355.1" y="307" width="119.8" height="16" rx="4" class="c-mask"/>
-          <text x="415" y="318" class="t-messagebus" font-size="8" text-anchor="middle">replicate (async, tre)</text>
+        <g data-detail="context" data-edge-from="primary" data-edge-to="replica2" data-edge-label="replicate (async, delayed)" data-edge-key="2" data-edge-id="replicate-lag">
+          <rect x="345.3" y="307" width="139.4" height="16" rx="4" class="c-mask"/>
+          <text x="415" y="318" class="t-messagebus" font-size="8" text-anchor="middle">replicate (async, delayed)</text>
         </g>
-        <g data-detail="context" data-edge-from="replica1" data-edge-to="read_fresh" data-edge-label="GET /profile - du lieu moi" data-edge-key="3" data-edge-id="read-fresh-req">
-          <rect x="567.8" y="113" width="139.4" height="16" rx="4" class="c-mask"/>
-          <text x="637.5" y="124" class="t-muted" font-size="8" text-anchor="middle">GET /profile - du lieu moi</text>
+        <g data-detail="context" data-edge-from="replica1" data-edge-to="read_fresh" data-edge-label="GET /profile - fresh data" data-edge-key="3" data-edge-id="read-fresh-req">
+          <rect x="570.25" y="113" width="134.5" height="16" rx="4" class="c-mask"/>
+          <text x="637.5" y="124" class="t-muted" font-size="8" text-anchor="middle">GET /profile - fresh data</text>
         </g>
-        <g data-detail="context" data-edge-from="replica2" data-edge-to="read_stale" data-edge-label="GET /profile - du lieu cu" data-edge-key="4" data-edge-id="read-stale-req">
+        <g data-detail="context" data-edge-from="replica2" data-edge-to="read_stale" data-edge-label="GET /profile - stale data" data-edge-key="4" data-edge-id="read-stale-req">
           <rect x="570.25" y="341" width="134.5" height="16" rx="4" class="c-mask"/>
-          <text x="637.5" y="352" class="t-security" font-size="8" text-anchor="middle">GET /profile - du lieu cu</text>
+          <text x="637.5" y="352" class="t-security" font-size="8" text-anchor="middle">GET /profile - stale data</text>
         </g>
 
         <!-- Legend -->
@@ -5486,34 +5486,34 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <h3>Read-Your-Writes Anomaly</h3>
         </div>
         <ul>
-          <li>&bull; Client ghi vao Primary, Primary ACK ngay lap tuc</li>
-          <li>&bull; Primary replicate bat dong bo sang Replica 1 va Replica 2, co do tre</li>
-          <li>&bull; Neu client doc ngay tu Replica 2 truoc khi replicate xong, se nhan du lieu cu</li>
+          <li>&bull; Client writes to Primary; Primary ACKs immediately</li>
+          <li>&bull; Primary replicates asynchronously to Replica 1 and Replica 2, with lag</li>
+          <li>&bull; If the client reads from Replica 2 right away, before replication finishes, it gets stale data</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot orange"></div>
-          <h3>Day khong phai bug</h3>
+          <h3>This Is Not a Bug</h3>
         </div>
         <ul>
-          <li>&bull; Do la danh doi co chu dich: replicate bat dong bo giup write latency thap va he thong san sang cao hon</li>
-          <li>&bull; He thong se &#39;eventually consistent&#39; - moi replica se hoi tu ve cung mot gia tri sau do tre replicate</li>
-          <li>&bull; Van de chi xuat hien trong khoang thoi gian ngan ngay sau khi ghi</li>
+          <li>&bull; It&#39;s a deliberate trade-off: async replication gives lower write latency and higher availability</li>
+          <li>&bull; The system is &#39;eventually consistent&#39; - every replica converges to the same value once the replication lag passes</li>
+          <li>&bull; The issue only appears in the short window right after a write</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot emerald"></div>
-          <h3>Cach dam bao Read-Your-Writes</h3>
+          <h3>How to Guarantee Read-Your-Writes</h3>
         </div>
         <ul>
-          <li>&bull; Sticky session ve Primary cho chinh client vua ghi trong mot khoang thoi gian</li>
-          <li>&bull; Doc tu Primary cho request ngay sau khi ghi, chuyen sang doc replica sau do</li>
-          <li>&bull; Session/causal consistency: server nho version da ghi va cho replica bat kip roi moi tra ket qua</li>
-          <li>&bull; Versioned reads: client gui kem version da ghi, replica tu choi tra loi neu chua bat kip</li>
+          <li>&bull; Sticky session to Primary for the client that just wrote, for a short window</li>
+          <li>&bull; Read from Primary for the request right after a write, then switch back to replica reads</li>
+          <li>&bull; Session/causal consistency: the server remembers the written version and waits for the replica to catch up before responding</li>
+          <li>&bull; Versioned reads: the client sends the version it wrote; the replica refuses to answer until it has caught up</li>
         </ul>
       </div>
     </div>

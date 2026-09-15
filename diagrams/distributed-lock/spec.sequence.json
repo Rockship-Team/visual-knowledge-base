@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "sequence",
   "meta": {
-    "title": "Distributed Lock: khoa dung de tranh Race Condition",
+    "title": "Distributed Lock",
     "output": "distributed-lock.html",
     "viewBox": [1050, 780],
     "quality_profile": "showcase"
@@ -14,19 +14,19 @@
     { "id": "db", "type": "database", "label": "Database", "sublabel": "balance = 100" }
   ],
   "segments": [
-    { "from": 145, "to": 205, "label": "A gianh khoa" },
-    { "from": 205, "to": 325, "label": "B bi tu choi, retry" },
-    { "from": 325, "to": 445, "label": "A chay critical section, tra khoa" },
-    { "from": 445, "to": 505, "label": "B retry thanh cong" },
-    { "from": 505, "to": 625, "label": "B chay critical section, tra khoa" }
+    { "from": 145, "to": 205, "label": "A acquires the lock" },
+    { "from": 205, "to": 325, "label": "B rejected, retries" },
+    { "from": 325, "to": 445, "label": "A runs critical section, releases lock" },
+    { "from": 445, "to": 505, "label": "B retry succeeds" },
+    { "from": 505, "to": 625, "label": "B runs critical section, releases lock" }
   ],
   "messages": [
     { "id": "a-acquire-req", "from": "instanceA", "to": "redis", "y": 160, "label": "SET lock NX PX 5000 (token=A)", "variant": "default" },
     { "id": "a-acquire-ok", "from": "redis", "to": "instanceA", "y": 190, "label": "OK (lock acquired)", "variant": "return" },
     { "id": "b-acquire-req", "from": "instanceB", "to": "redis", "y": 220, "label": "SET lock NX PX 5000 (token=B)", "variant": "default" },
-    { "id": "b-acquire-fail", "from": "redis", "to": "instanceB", "y": 250, "label": "nil (key da ton tai)", "variant": "return" },
+    { "id": "b-acquire-fail", "from": "redis", "to": "instanceB", "y": 250, "label": "nil (key already exists)", "variant": "return" },
     { "id": "b-retry1-req", "from": "instanceB", "to": "redis", "y": 280, "label": "retry: SET lock NX (token=B)", "variant": "dashed" },
-    { "id": "b-retry1-fail", "from": "redis", "to": "instanceB", "y": 310, "label": "nil (van con khoa)", "variant": "dashed" },
+    { "id": "b-retry1-fail", "from": "redis", "to": "instanceB", "y": 310, "label": "nil (still locked)", "variant": "dashed" },
     { "id": "a-write-req", "from": "instanceA", "to": "db", "y": 340, "label": "UPDATE balance = balance + 50", "variant": "emphasis" },
     { "id": "a-write-ok", "from": "db", "to": "instanceA", "y": 370, "label": "OK", "variant": "return" },
     { "id": "a-release-req", "from": "instanceA", "to": "redis", "y": 400, "label": "DEL lock IF token = A (Lua script)", "variant": "default" },
@@ -51,29 +51,29 @@
   "cards": [
     {
       "dot": "rose",
-      "title": "Race condition duoc ngan chan the nao",
+      "title": "How the race condition is prevented",
       "items": [
-        "Ca 2 instance cung muon chay critical section, nhung chi 1 duoc cap lock tai 1 thoi diem",
-        "Instance con lai bi Redis tu choi (NX that bai) va phai retry",
-        "Sau khi A release lock, B moi duoc cap va tiep tuc — khong con doc-tinh-ghi chong cheo"
+        "Both instances want to run the critical section, but only one holds the lock at a time",
+        "The other instance is rejected by Redis (NX fails) and must retry",
+        "Only after A releases the lock does B acquire it and proceed — no more overlapping read-modify-write"
       ]
     },
     {
       "dot": "orange",
-      "title": "Yeu cau dung cua distributed lock",
+      "title": "Requirements for a correct distributed lock",
       "items": [
-        "TTL/PX bat buoc: neu instance giu lock bi crash, lock tu dong het han thay vi khoa vinh vien",
-        "Token duy nhat cho moi lan acquire: chi xoa lock neu token con khop, tranh xoa nham lock cua instance khac sau khi TTL het han",
-        "Thao tac SET NX va DEL-neu-token-khop can atomic (Lua script) de tranh race ngay trong chinh logic lock"
+        "TTL/PX is mandatory: if the lock holder crashes, the lock expires automatically instead of blocking forever",
+        "A unique token per acquire: only delete the lock if the token still matches, to avoid deleting another instance's lock after TTL expiry",
+        "SET NX and delete-if-token-matches must be atomic (Lua script) to avoid a race inside the locking logic itself"
       ]
     },
     {
       "dot": "emerald",
-      "title": "Han che can biet",
+      "title": "Known limitations",
       "items": [
-        "Redlock (nhieu Redis node) van bi tranh cai ve tinh an toan khi clock/network khong ly tuong",
-        "Voi yeu cau correctness cao, nen ket hop them fencing token o phia resource duoc bao ve",
-        "Voi single Redis instance, day la giai phap don gian va du dung cho da so use case thuc te"
+        "Redlock (multiple Redis nodes) is still debated for safety when clocks/network aren't ideal",
+        "For high-correctness requirements, combine it with a fencing token on the protected resource",
+        "With a single Redis instance, this is a simple solution that's good enough for most real-world use cases"
       ]
     }
   ]

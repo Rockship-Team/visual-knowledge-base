@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -13,32 +13,45 @@
       <a class="brand" href="./">Visual Knowledge Base</a>
       <nav>
         <a href="https://github.com/Rockship-Team/visual-knowledge-base" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Đóng góp</a>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">
+          <span data-lang="en">Contribute</span><span data-lang="vi" hidden>Đóng góp</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
       </nav>
     </div>
-    <p class="tagline">Kho tổng hợp kiến thức backend dưới dạng diagram trực quan (architecture, sequence, workflow, dataflow, lifecycle) để dev công ty tự học, dựng bằng <a href="https://github.com/tt-a1i/archify" target="_blank" rel="noopener">archify</a>.</p>
+    <p class="tagline" data-lang="en">A curated collection of backend engineering concepts as interactive diagrams (architecture, sequence, workflow, dataflow, lifecycle) for the team to learn from, built with <a href="https://github.com/tt-a1i/archify" target="_blank" rel="noopener">archify</a>.</p>
+    <p class="tagline" data-lang="vi" hidden>Kho tổng hợp kiến thức backend dưới dạng diagram trực quan (architecture, sequence, workflow, dataflow, lifecycle) để dev công ty tự học, dựng bằng <a href="https://github.com/tt-a1i/archify" target="_blank" rel="noopener">archify</a>.</p>
   </div>
 </header>
 
 <main class="wrap">
   <div class="toolbar">
-    <input id="catalog-search" class="search-input" type="search" placeholder="Tìm theo tên, mô tả, tag…" aria-label="Tìm chủ đề">
+    <input id="catalog-search" class="search-input" type="search"
+           placeholder="Search by name, description, tag…"
+           data-ph-en="Search by name, description, tag…"
+           data-ph-vi="Tìm theo tên, mô tả, tag…"
+           aria-label="Search topics">
     <div id="catalog-pills" class="pills"></div>
   </div>
-  <nav id="category-nav" class="category-nav" aria-label="Nhảy tới danh mục"></nav>
+  <nav id="category-nav" class="category-nav" aria-label="Jump to category"></nav>
 
   <section class="category-section" id="concurrency-distributed-systems" data-category-label="Concurrency & Distributed Systems">
     <div class="category-head">
       <h2 class="category-title">Concurrency &amp; Distributed Systems</h2>
     </div>
-    <p class="category-desc">Race condition, deadlock, distributed lock, idempotency, consensus, CAP theorem, eventual consistency.</p>
+    <p class="category-desc" data-lang="en">Race conditions, deadlocks, distributed locks, idempotency, consensus, CAP theorem, eventual consistency.</p>
+    <p class="category-desc" data-lang="vi" hidden>Race condition, deadlock, distributed lock, idempotency, consensus, CAP theorem, eventual consistency.</p>
     <div class="grid">
       <a class="card"
          href="diagrams/race-condition-lost-update/"
          data-type="sequence"
          data-search="race condition lost update concurrency distributed-systems database khoa lock">
         <h2>Race Condition: Lost Update</h2>
-        <p class="desc">Hai client cùng đọc-tính-ghi số dư tài khoản mà không đồng bộ, khiến một lần cập nhật bị mất.</p>
+        <p class="desc" data-lang="en">Two clients read-modify-write the same balance without synchronization, silently dropping one update.</p>
+        <p class="desc" data-lang="vi" hidden>Hai client cùng đọc-tính-ghi số dư tài khoản mà không đồng bộ, khiến một lần cập nhật bị mất.</p>
         <div class="meta-row">
           <span class="badge">sequence</span>
           <span class="tag">concurrency</span>
@@ -50,8 +63,9 @@
          href="diagrams/deadlock-circular-wait/"
          data-type="sequence"
          data-search="deadlock circular wait concurrency database locking khoa transaction">
-        <h2>Deadlock: Circular Wait giữa 2 Transaction</h2>
-        <p class="desc">Hai transaction cùng giữ một khóa mà bên kia đang cần, tạo vòng chờ khép kín cho tới khi deadlock detector abort một bên.</p>
+        <h2>Deadlock: Circular Wait Between Two Transactions</h2>
+        <p class="desc" data-lang="en">Two transactions each hold a lock the other needs, forming a closed wait cycle until the deadlock detector aborts one.</p>
+        <p class="desc" data-lang="vi" hidden>Hai transaction cùng giữ một khóa mà bên kia đang cần, tạo vòng chờ khép kín cho tới khi deadlock detector abort một bên.</p>
         <div class="meta-row">
           <span class="badge">sequence</span>
           <span class="tag">concurrency</span>
@@ -65,7 +79,8 @@
          data-type="sequence"
          data-search="distributed lock redis nx px token concurrency distributed-systems critical section">
         <h2>Distributed Lock</h2>
-        <p class="desc">Dùng Redis lock (SET NX PX + token) để đảm bảo chỉ một instance chạy critical section tại một thời điểm — cách khắc phục đúng cho Lost Update.</p>
+        <p class="desc" data-lang="en">A Redis lock (SET NX PX + token) ensures only one instance runs the critical section at a time — the correct fix for Lost Update.</p>
+        <p class="desc" data-lang="vi" hidden>Dùng Redis lock (SET NX PX + token) để đảm bảo chỉ một instance chạy critical section tại một thời điểm — cách khắc phục đúng cho Lost Update.</p>
         <div class="meta-row">
           <span class="badge">sequence</span>
           <span class="tag">concurrency</span>
@@ -78,8 +93,9 @@
          href="diagrams/idempotency-key/"
          data-type="sequence"
          data-search="idempotency key retry api design reliability payment charge distributed-systems">
-        <h2>Idempotency Key: an toàn khi retry API</h2>
-        <p class="desc">Client retry một request bị timeout với cùng Idempotency-Key, server phát hiện và trả kết quả cũ thay vì charge thẻ hai lần.</p>
+        <h2>Idempotency Key: Safe API Retries</h2>
+        <p class="desc" data-lang="en">A client retries a timed-out request with the same Idempotency-Key; the server detects the duplicate and returns the cached result instead of charging twice.</p>
+        <p class="desc" data-lang="vi" hidden>Client retry một request bị timeout với cùng Idempotency-Key, server phát hiện và trả kết quả cũ thay vì charge thẻ hai lần.</p>
         <div class="meta-row">
           <span class="badge">sequence</span>
           <span class="tag">distributed-systems</span>
@@ -92,8 +108,9 @@
          href="diagrams/cap-theorem/"
          data-type="workflow"
          data-search="cap theorem consistency availability partition tolerance distributed-systems trade-off replication">
-        <h2>CAP Theorem: Consistency vs Availability khi Network Partition</h2>
-        <p class="desc">Khi network partition xảy ra giữa các node, hệ thống phải chọn giữa giữ Consistency hay Availability.</p>
+        <h2>CAP Theorem: Consistency vs Availability During a Network Partition</h2>
+        <p class="desc" data-lang="en">When a network partition splits the nodes, the system must choose between staying Consistent or staying Available.</p>
+        <p class="desc" data-lang="vi" hidden>Khi network partition xảy ra giữa các node, hệ thống phải chọn giữa giữ Consistency hay Availability.</p>
         <div class="meta-row">
           <span class="badge">workflow</span>
           <span class="tag">distributed-systems</span>
@@ -103,25 +120,12 @@
       </a>
 
       <a class="card"
-         href="diagrams/eventual-consistency/"
-         data-type="dataflow"
-         data-search="eventual consistency read your writes anomaly replication replica lag distributed-systems">
-        <h2>Eventual Consistency: Read-Your-Writes Anomaly</h2>
-        <p class="desc">Client ghi xong nhưng đọc lại ngay lập tức từ một replica chưa kịp cập nhật sẽ thấy dữ liệu cũ.</p>
-        <div class="meta-row">
-          <span class="badge">dataflow</span>
-          <span class="tag">distributed-systems</span>
-          <span class="tag">replication</span>
-          <span class="tag">consistency</span>
-        </div>
-      </a>
-
-      <a class="card"
          href="diagrams/leader-election-raft/"
          data-type="lifecycle"
          data-search="leader election raft consensus quorum split vote follower candidate distributed-systems">
-        <h2>Leader Election: Raft Consensus cơ bản</h2>
-        <p class="desc">State machine Follower → Candidate → Leader trong Raft, minh họa quorum, split vote retry, và step-down khi phát hiện term cao hơn.</p>
+        <h2>Leader Election: Raft Consensus Basics</h2>
+        <p class="desc" data-lang="en">Follower → Candidate → Leader state machine, showing quorum, split-vote retry, and step-down on a higher term.</p>
+        <p class="desc" data-lang="vi" hidden>State machine Follower → Candidate → Leader trong Raft, minh họa quorum, split vote retry, và step-down khi phát hiện term cao hơn.</p>
         <div class="meta-row">
           <span class="badge">lifecycle</span>
           <span class="tag">distributed-systems</span>
@@ -129,18 +133,38 @@
           <span class="tag">raft</span>
         </div>
       </a>
+
+      <a class="card"
+         href="diagrams/eventual-consistency/"
+         data-type="dataflow"
+         data-search="eventual consistency read your writes anomaly replication replica lag distributed-systems">
+        <h2>Eventual Consistency: Read-Your-Writes Anomaly</h2>
+        <p class="desc" data-lang="en">A client reads from a replica that hasn't caught up yet right after writing, and sees stale data.</p>
+        <p class="desc" data-lang="vi" hidden>Client ghi xong nhưng đọc lại ngay lập tức từ một replica chưa kịp cập nhật sẽ thấy dữ liệu cũ.</p>
+        <div class="meta-row">
+          <span class="badge">dataflow</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">replication</span>
+          <span class="tag">consistency</span>
+        </div>
+      </a>
     </div>
   </section>
 
-  <p id="catalog-empty" class="empty" hidden>Không tìm thấy chủ đề nào khớp.</p>
+  <p id="catalog-empty" class="empty" hidden>
+    <span data-lang="en">No matching topics found.</span>
+    <span data-lang="vi" hidden>Không tìm thấy chủ đề nào khớp.</span>
+  </p>
 </main>
 
 <footer class="site-footer">
   <div class="wrap">
-    Muốn thêm một chủ đề? Xem hướng dẫn trong <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">CONTRIBUTING.md</a>.
+    <span data-lang="en">Want to add a topic? See the guide in <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">CONTRIBUTING.md</a>.</span>
+    <span data-lang="vi" hidden>Muốn thêm một chủ đề? Xem hướng dẫn trong <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">CONTRIBUTING.md</a>.</span>
   </div>
 </footer>
 
 <script src="assets/site.js"></script>
+<script src="assets/i18n.js"></script>
 </body>
 </html>

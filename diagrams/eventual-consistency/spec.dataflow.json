@@ -8,53 +8,53 @@
     "quality_profile": "showcase"
   },
   "stages": [
-    { "label": "Ghi (Write)" },
-    { "label": "Nguon ghi (Primary)" },
-    { "label": "Ban sao (Replicas)" },
-    { "label": "Doc (Read)" }
+    { "label": "Write" },
+    { "label": "Primary" },
+    { "label": "Replicas" },
+    { "label": "Read" }
   ],
   "nodes": [
-    { "id": "client_write", "type": "external", "label": "Client", "sublabel": "ghi du lieu moi", "stage": 0, "row": 1 },
-    { "id": "primary", "type": "database", "label": "Primary DB", "sublabel": "nguon ghi, ACK ngay", "stage": 1, "row": 1 },
-    { "id": "replica1", "type": "database", "label": "Replica 1", "sublabel": "da nhan replicate", "stage": 2, "row": 0 },
-    { "id": "replica2", "type": "database", "label": "Replica 2", "sublabel": "chua nhan kip (lag)", "stage": 2, "row": 2 },
-    { "id": "read_fresh", "type": "external", "label": "Client - doc sau", "sublabel": "nhan du lieu moi", "stage": 3, "row": 0 },
-    { "id": "read_stale", "type": "external", "label": "Client - doc ngay", "sublabel": "nhan du lieu cu (stale)", "stage": 3, "row": 2 }
+    { "id": "client_write", "type": "external", "label": "Client", "sublabel": "writes new data", "stage": 0, "row": 1 },
+    { "id": "primary", "type": "database", "label": "Primary DB", "sublabel": "source of truth", "stage": 1, "row": 1 },
+    { "id": "replica1", "type": "database", "label": "Replica 1", "sublabel": "replication caught up", "stage": 2, "row": 0 },
+    { "id": "replica2", "type": "database", "label": "Replica 2", "sublabel": "replication lagging", "stage": 2, "row": 2 },
+    { "id": "read_fresh", "type": "external", "label": "Client (later)", "sublabel": "gets fresh data", "stage": 3, "row": 0 },
+    { "id": "read_stale", "type": "external", "label": "Client (immediate)", "sublabel": "gets stale data", "stage": 3, "row": 2 }
   ],
   "flows": [
     { "id": "write-req", "from": "client_write", "to": "primary", "label": "PUT /profile", "variant": "emphasis", "route": "straight" },
     { "id": "replicate-ok", "from": "primary", "to": "replica1", "label": "replicate (async)", "variant": "default", "route": "vertical-channel" },
-    { "id": "replicate-lag", "from": "primary", "to": "replica2", "label": "replicate (async, tre)", "variant": "dashed", "route": "vertical-channel" },
-    { "id": "read-fresh-req", "from": "replica1", "to": "read_fresh", "label": "GET /profile - du lieu moi", "variant": "default", "route": "straight", "labelDy": -23 },
-    { "id": "read-stale-req", "from": "replica2", "to": "read_stale", "label": "GET /profile - du lieu cu", "variant": "security", "route": "straight", "labelDy": -23 }
+    { "id": "replicate-lag", "from": "primary", "to": "replica2", "label": "replicate (async, delayed)", "variant": "dashed", "route": "vertical-channel" },
+    { "id": "read-fresh-req", "from": "replica1", "to": "read_fresh", "label": "GET /profile - fresh data", "variant": "default", "route": "straight", "labelDy": -23 },
+    { "id": "read-stale-req", "from": "replica2", "to": "read_stale", "label": "GET /profile - stale data", "variant": "security", "route": "straight", "labelDy": -23 }
   ],
   "cards": [
     {
       "dot": "rose",
       "title": "Read-Your-Writes Anomaly",
       "items": [
-        "Client ghi vao Primary, Primary ACK ngay lap tuc",
-        "Primary replicate bat dong bo sang Replica 1 va Replica 2, co do tre",
-        "Neu client doc ngay tu Replica 2 truoc khi replicate xong, se nhan du lieu cu"
+        "Client writes to Primary; Primary ACKs immediately",
+        "Primary replicates asynchronously to Replica 1 and Replica 2, with lag",
+        "If the client reads from Replica 2 right away, before replication finishes, it gets stale data"
       ]
     },
     {
       "dot": "orange",
-      "title": "Day khong phai bug",
+      "title": "This Is Not a Bug",
       "items": [
-        "Do la danh doi co chu dich: replicate bat dong bo giup write latency thap va he thong san sang cao hon",
-        "He thong se 'eventually consistent' - moi replica se hoi tu ve cung mot gia tri sau do tre replicate",
-        "Van de chi xuat hien trong khoang thoi gian ngan ngay sau khi ghi"
+        "It's a deliberate trade-off: async replication gives lower write latency and higher availability",
+        "The system is 'eventually consistent' - every replica converges to the same value once the replication lag passes",
+        "The issue only appears in the short window right after a write"
       ]
     },
     {
       "dot": "emerald",
-      "title": "Cach dam bao Read-Your-Writes",
+      "title": "How to Guarantee Read-Your-Writes",
       "items": [
-        "Sticky session ve Primary cho chinh client vua ghi trong mot khoang thoi gian",
-        "Doc tu Primary cho request ngay sau khi ghi, chuyen sang doc replica sau do",
-        "Session/causal consistency: server nho version da ghi va cho replica bat kip roi moi tra ket qua",
-        "Versioned reads: client gui kem version da ghi, replica tu choi tra loi neu chua bat kip"
+        "Sticky session to Primary for the client that just wrote, for a short window",
+        "Read from Primary for the request right after a write, then switch back to replica reads",
+        "Session/causal consistency: the server remembers the written version and waits for the replica to catch up before responding",
+        "Versioned reads: the client sends the version it wrote; the replica refuses to answer until it has caught up"
       ]
     }
   ]

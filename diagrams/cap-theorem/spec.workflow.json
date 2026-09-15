@@ -2,48 +2,48 @@
   "schema_version": 2,
   "diagram_type": "workflow",
   "meta": {
-    "title": "CAP Theorem: Consistency vs Availability khi Network Partition",
+    "title": "CAP Theorem: Consistency vs Availability During a Network Partition",
     "output": "diagram.html",
     "quality_profile": "showcase"
   },
   "lanes": [
     {
       "id": "flow",
-      "label": "Trang thai he thong"
+      "label": "System State"
     },
     {
       "id": "cp",
-      "label": "Nhanh chon Consistency (CP)",
+      "label": "Consistency Path (CP)",
       "variant": "exception"
     },
     {
       "id": "ap",
-      "label": "Nhanh chon Availability (AP)"
+      "label": "Availability Path (AP)"
     }
   ],
   "phases": [
     {
       "id": "normal",
-      "label": "Binh thuong",
+      "label": "Normal",
       "fromCol": 0,
       "toCol": 1
     },
     {
       "id": "fault",
-      "label": "Partition xay ra",
+      "label": "Partition Occurs",
       "fromCol": 2,
       "toCol": 3
     },
     {
       "id": "tradeoff",
-      "label": "CAP trade-off",
+      "label": "CAP Trade-off",
       "fromCol": 4,
       "toCol": 4,
       "variant": "emphasis"
     },
     {
       "id": "recover",
-      "label": "Khoi phuc",
+      "label": "Recovery",
       "fromCol": 5,
       "toCol": 5
     }
@@ -63,7 +63,7 @@
       "col": 0,
       "type": "external",
       "label": "Client",
-      "sublabel": "doc/ghi du lieu",
+      "sublabel": "reads/writes data",
       "width": 150
     },
     {
@@ -72,7 +72,7 @@
       "col": 1,
       "type": "database",
       "label": "Node A & B",
-      "sublabel": "dong bo binh thuong",
+      "sublabel": "normally in sync",
       "width": 150
     },
     {
@@ -81,7 +81,7 @@
       "col": 2,
       "type": "security",
       "label": "Network Partition",
-      "sublabel": "A <-> B mat ket noi",
+      "sublabel": "A <-> B disconnected",
       "width": 150
     },
     {
@@ -89,8 +89,8 @@
       "lane": "flow",
       "col": 3,
       "type": "external",
-      "label": "Doc tu Node B",
-      "sublabel": "trong luc partition",
+      "label": "Read from Node B",
+      "sublabel": "during the partition",
       "width": 150
     },
     {
@@ -98,8 +98,8 @@
       "lane": "cp",
       "col": 4,
       "type": "security",
-      "label": "CP: Tu choi/loi",
-      "sublabel": "cho xac nhan voi A",
+      "label": "CP: Reject/Error",
+      "sublabel": "waiting to confirm with A",
       "width": 150
     },
     {
@@ -107,8 +107,8 @@
       "lane": "ap",
       "col": 4,
       "type": "backend",
-      "label": "AP: Tra du lieu cu",
-      "sublabel": "co the stale",
+      "label": "AP: Return Stale Data",
+      "sublabel": "may be stale",
       "width": 150
     },
     {
@@ -116,7 +116,7 @@
       "lane": "flow",
       "col": 5,
       "type": "database",
-      "label": "Partition heals",
+      "label": "Partition Heals",
       "sublabel": "re-sync A & B",
       "width": 150
     }
@@ -132,21 +132,21 @@
       "id": "sync-partition",
       "from": "sync_state",
       "to": "partition",
-      "label": "mang loi",
+      "label": "network failure",
       "variant": "default"
     },
     {
       "id": "partition-read",
       "from": "partition",
       "to": "read_b",
-      "label": "client van goi Node B",
+      "label": "client still calls Node B",
       "variant": "default"
     },
     {
       "id": "read-cp",
       "from": "read_b",
       "to": "cp_choice",
-      "label": "chon Consistency",
+      "label": "choose Consistency",
       "variant": "security",
       "role": "branch"
     },
@@ -154,7 +154,7 @@
       "id": "read-ap",
       "from": "read_b",
       "to": "ap_choice",
-      "label": "chon Availability",
+      "label": "choose Availability",
       "variant": "emphasis",
       "role": "branch"
     },
@@ -176,19 +176,19 @@
   "cards": [
     {
       "dot": "orange",
-      "title": "CAP la gi",
+      "title": "What Is CAP",
       "items": [
-        "Consistency: moi node tra ve du lieu moi nhat giong nhau",
-        "Availability: moi request van nhan duoc response (khong loi)",
-        "Partition tolerance: he thong van hoat dong khi mang bi chia cat"
+        "Consistency: every node returns the same, most recent data",
+        "Availability: every request still gets a response (no error)",
+        "Partition tolerance: the system keeps working when the network is split"
       ]
     },
     {
       "dot": "rose",
-      "title": "Khi partition xay ra",
+      "title": "When a Partition Happens",
       "items": [
-        "P gan nhu bat buoc phai chap nhan trong he phan tan thuc te",
-        "Cau hoi thuc su la chon C hay A khi P xay ra, khong phai chon ca 3"
+        "P is essentially unavoidable in a real distributed system",
+        "The real question is choosing C or A when P happens, not choosing all three"
       ]
     }
   ]
