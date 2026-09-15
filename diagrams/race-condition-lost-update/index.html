@@ -48,6 +48,10 @@
     <h2>Summary</h2>
     <p>Illustrates a <strong>Lost Update</strong> race condition on an account balance, where two clients read-modify-write concurrently with no synchronization mechanism.</p>
 
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Any time two requests can read the same mutable value and write it back without a lock, transaction, or atomic operation — most commonly counters, balances, and inventory counts under concurrent traffic.</p>
+    <p><strong>Where to spot it:</strong> Shopping cart/inventory decrements, wallet or loyalty-point balances, "increment view count" endpoints, and any ORM pattern that does "load row → mutate in application code → save row".</p>
+
     <h2>Scenario</h2>
     <ol>
       <li><strong>Client A</strong> reads <code>balance = 100</code> → computes <code>100 + 50 = 150</code></li>
@@ -83,6 +87,10 @@ node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram
   <div class="prose" data-lang="vi" hidden>
     <h2>Tóm tắt</h2>
     <p>Minh họa race condition kiểu <strong>Lost Update</strong> trên số dư tài khoản, khi hai client cùng đọc-tính-ghi (read-modify-write) mà không có cơ chế đồng bộ.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất cứ khi nào hai request có thể đọc cùng một giá trị có thể thay đổi rồi ghi lại mà không có lock, transaction hay atomic operation — phổ biến nhất là counter, số dư, tồn kho dưới tải đồng thời.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Giảm số lượng trong giỏ hàng/tồn kho, số dư ví hoặc điểm thưởng, endpoint kiểu "tăng view count", và bất kỳ pattern nào trong ORM làm "load row → sửa trong code ứng dụng → save row".</p>
 
     <h2>Kịch bản</h2>
     <ol>

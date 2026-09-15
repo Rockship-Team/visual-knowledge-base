@@ -10,6 +10,12 @@
 
 In a distributed system, multiple nodes need to agree on **a single leader** to avoid write conflicts. Raft solves this with a simple state machine: **Follower → Candidate → Leader**, driven by majority voting (quorum).
 
+### When It Happens
+
+**When:** Any distributed system that needs exactly one active coordinator to avoid conflicting decisions — schedulers, distributed locks themselves, and consensus-backed config stores.
+
+**Where to spot it:** etcd/ZooKeeper/Consul clusters, Kafka controller election, a self-hosted job scheduler running on multiple replicas, and any primary/replica database setup that needs an automatic failover decision.
+
 ### Scenario
 
 1. **Follower** is the default state: the node passively waits for heartbeats from the current leader
@@ -47,6 +53,12 @@ node bin/archify.mjs deliver lifecycle path/to/spec.lifecycle.json path/to/diagr
 ### Tóm tắt
 
 Trong một hệ phân tán, nhiều node cần thống nhất chọn ra **một leader duy nhất** để tránh xung đột khi ghi dữ liệu. Raft giải quyết bài toán này bằng một state machine đơn giản: **Follower → Candidate → Leader**, dựa trên bỏ phiếu đa số (quorum).
+
+### Khi Nào Cần
+
+**Khi nào:** Bất kỳ hệ phân tán nào cần đúng một coordinator đang hoạt động để tránh các quyết định xung đột nhau — scheduler, chính distributed lock, và các config store dựa trên consensus.
+
+**Ở đâu dễ gặp:** Cluster etcd/ZooKeeper/Consul, bầu controller trong Kafka, job scheduler tự host chạy trên nhiều replica, và mọi setup database primary/replica cần tự động quyết định failover.
 
 ### Kịch bản
 

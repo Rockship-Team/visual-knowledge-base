@@ -10,6 +10,12 @@
 
 Illustrates a **Lost Update** race condition on an account balance, where two clients read-modify-write concurrently with no synchronization mechanism.
 
+### When It Happens
+
+**When:** Any time two requests can read the same mutable value and write it back without a lock, transaction, or atomic operation — most commonly counters, balances, and inventory counts under concurrent traffic.
+
+**Where to spot it:** Shopping cart/inventory decrements, wallet or loyalty-point balances, "increment view count" endpoints, and any ORM pattern that does "load row → mutate in application code → save row".
+
 ### Scenario
 
 1. **Client A** reads `balance = 100` → computes `100 + 50 = 150`
@@ -48,6 +54,12 @@ node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram
 ### Tóm tắt
 
 Minh họa race condition kiểu **Lost Update** trên số dư tài khoản, khi hai client cùng đọc-tính-ghi (read-modify-write) mà không có cơ chế đồng bộ.
+
+### Khi Nào Gặp
+
+**Khi nào:** Bất cứ khi nào hai request có thể đọc cùng một giá trị có thể thay đổi rồi ghi lại mà không có lock, transaction hay atomic operation — phổ biến nhất là counter, số dư, tồn kho dưới tải đồng thời.
+
+**Ở đâu dễ gặp:** Giảm số lượng trong giỏ hàng/tồn kho, số dư ví hoặc điểm thưởng, endpoint kiểu "tăng view count", và bất kỳ pattern nào trong ORM làm "load row → sửa trong code ứng dụng → save row".
 
 ### Kịch bản
 

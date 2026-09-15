@@ -48,6 +48,10 @@
     <h2>Summary</h2>
     <p>A distributed lock (using Redis <code>SET NX PX</code>) is the correct fix for the <a href="../race-condition-lost-update/">Lost Update</a> race condition: it guarantees only one instance runs the critical section at a time.</p>
 
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Whenever a critical section must run on exactly one instance across multiple processes or servers — cron jobs deployed on every pod, workers competing for the same queue item, or any "only one at a time" business rule.</p>
+    <p><strong>Where to spot it:</strong> Scheduled jobs in a horizontally-scaled deployment, background workers consuming from a shared queue, and any endpoint protecting a resource that a plain in-process mutex can't cover, because it only works within a single process.</p>
+
     <h2>Scenario</h2>
     <ol>
       <li><strong>Instance A</strong> sends <code>SET lock token=A NX PX 5000</code> to Redis → succeeds, holds the lock</li>
@@ -82,6 +86,10 @@ node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram
   <div class="prose" data-lang="vi" hidden>
     <h2>Tóm tắt</h2>
     <p>Distributed lock (dùng Redis <code>SET NX PX</code>) là cách khắc phục đúng cho race condition kiểu <a href="../race-condition-lost-update/">Lost Update</a>: đảm bảo chỉ một instance được chạy critical section tại một thời điểm.</p>
+
+    <h2>Khi Nào Cần</h2>
+    <p><strong>Khi nào:</strong> Bất cứ khi nào một critical section chỉ được phép chạy trên đúng một instance giữa nhiều process hoặc server — cron job deploy trên mọi pod, worker tranh nhau cùng một item trong queue, hoặc bất kỳ rule kiểu "chỉ một cái tại một thời điểm".</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Scheduled job trong deployment scale ngang, background worker đọc từ queue dùng chung, và các endpoint bảo vệ resource mà mutex trong process không đủ vì nó chỉ hoạt động trong một process duy nhất.</p>
 
     <h2>Kịch bản</h2>
     <ol>

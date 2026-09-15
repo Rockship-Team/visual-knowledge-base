@@ -10,6 +10,12 @@
 
 The **CAP theorem** says a distributed data system cannot simultaneously guarantee all three properties: **C**onsistency (every node returns the same, most recent data), **A**vailability (every request still gets a response, no error), and **P**artition tolerance (the system keeps working when the network between nodes is split). In practice, Partition tolerance is essentially unavoidable — the network will fail sometimes — so the real question isn't "pick one of three", it's **choosing C or A when a partition happens**.
 
+### When It Happens
+
+**When:** Whenever a system spans more than one node and the network between them can fail or slow down — at scale, that's a matter of "when", not "if".
+
+**Where to spot it:** Multi-region databases, service meshes with cross-AZ calls, any replicated datastore (Postgres with read replicas, Cassandra, DynamoDB, etcd), and design reviews where someone asks "what happens if this node can't reach that one?"
+
 ### Scenario
 
 1. Normally: the client reads/writes through **Node A** and **Node B**, and the two nodes stay continuously in sync
@@ -43,6 +49,12 @@ node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram
 ### Tóm tắt
 
 **CAP theorem** nói rằng một hệ thống dữ liệu phân tán không thể đồng thời đảm bảo cả 3 tính chất: **C**onsistency (mọi node trả về dữ liệu mới nhất giống nhau), **A**vailability (mọi request đều nhận được response, không lỗi), và **P**artition tolerance (hệ thống vẫn hoạt động khi mạng giữa các node bị chia cắt). Trong thực tế, Partition tolerance gần như bắt buộc phải chấp nhận — mạng sẽ luôn có lúc lỗi — nên câu hỏi thật sự không phải "chọn cái nào trong 3 cái", mà là **chọn C hay A khi partition xảy ra**.
+
+### Khi Nào Cần Quan Tâm
+
+**Khi nào:** Bất cứ khi nào hệ thống trải trên nhiều hơn một node và mạng giữa chúng có thể lỗi hoặc chậm — ở quy mô lớn, đây là chuyện "khi nào" chứ không phải "có xảy ra hay không".
+
+**Ở đâu dễ gặp:** Database multi-region, service mesh gọi cross-AZ, mọi datastore có replication (Postgres kèm read replica, Cassandra, DynamoDB, etcd), và trong các buổi design review khi có người hỏi "nếu node này không gọi được tới node kia thì sao?"
 
 ### Kịch bản
 

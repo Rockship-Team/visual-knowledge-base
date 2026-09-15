@@ -48,6 +48,10 @@
     <h2>Summary</h2>
     <p>An <strong>idempotency key</strong> is a unique token the client generates and sends with every request that has a side effect (e.g. creating a payment). It lets the server tell a "new request" apart from "a retry of the same action," so an operation doesn't accidentally run twice when the network is unreliable.</p>
 
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Any time a client can't be sure whether a request actually succeeded — a network timeout, the client crashing before reading the response, or a proxy/load balancer retrying automatically — and then resends the same operation.</p>
+    <p><strong>Where to spot it:</strong> Payment/charge endpoints, order creation, sending money or notifications, and any POST/PUT with a side effect that sits behind a mobile client or an unreliable network.</p>
+
     <h2>Scenario</h2>
     <ol>
       <li><strong>Client</strong> calls <code>POST /charge</code> with header <code>Idempotency-Key: abc123</code></li>
@@ -87,6 +91,10 @@ node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram
   <div class="prose" data-lang="vi" hidden>
     <h2>Tóm tắt</h2>
     <p><strong>Idempotency key</strong> là một token duy nhất do client sinh ra và gửi kèm mỗi request có side effect (ví dụ tạo thanh toán). Nó giúp server phân biệt được "request mới" với "request retry của cùng một hành động", để một thao tác không vô tình bị thực hiện hai lần khi mạng không ổn định.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất cứ khi nào client không chắc chắn request trước có thành công hay không — timeout mạng, client crash trước khi đọc được response, hoặc proxy/load balancer tự động retry — rồi gửi lại cùng một thao tác đó.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Endpoint thanh toán/charge, tạo đơn hàng, chuyển tiền hoặc gửi thông báo, và bất kỳ POST/PUT nào có side effect nằm sau mobile client hoặc mạng không ổn định.</p>
 
     <h2>Kịch bản</h2>
     <ol>

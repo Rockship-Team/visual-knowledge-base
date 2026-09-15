@@ -10,6 +10,12 @@
 
 Illustrates the **read-your-writes anomaly** in a system using **eventual consistency**: a client writes successfully, but an immediate read can still see stale data, because replication between nodes is asynchronous and lags.
 
+### When It Happens
+
+**When:** Right after a write, whenever a subsequent read can be served by a different, asynchronously-replicated node than the one that accepted the write.
+
+**Where to spot it:** "I just saved my profile but the page still shows the old data" bug reports, read replicas behind a load balancer, CDN/cache invalidation lag, and any multi-region write-then-read-elsewhere flow.
+
 ### Scenario
 
 1. **Client** writes new data (`PUT /profile`) to the **Primary DB**. Primary ACKs immediately, without waiting for replication to finish.
@@ -48,6 +54,12 @@ node bin/archify.mjs deliver dataflow path/to/spec.dataflow.json path/to/diagram
 ### Tóm tắt
 
 Minh họa hiện tượng **read-your-writes anomaly** trong một hệ thống dùng **eventual consistency**: client ghi xong nhưng đọc lại ngay lập tức có thể vẫn thấy dữ liệu cũ, vì replication giữa các node là bất đồng bộ và có độ trễ.
+
+### Khi Nào Gặp
+
+**Khi nào:** Ngay sau một lần ghi, khi lần đọc tiếp theo có thể được phục vụ bởi một node khác — replicate bất đồng bộ — chứ không phải node vừa nhận ghi.
+
+**Ở đâu dễ gặp:** Bug kiểu "em vừa lưu profile mà trang vẫn hiện dữ liệu cũ", read replica sau load balancer, độ trễ invalidate cache/CDN, và mọi luồng ghi ở vùng này rồi đọc ở vùng khác.
 
 ### Kịch bản
 

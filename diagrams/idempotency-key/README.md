@@ -10,6 +10,12 @@
 
 An **idempotency key** is a unique token the client generates and sends with every request that has a side effect (e.g. creating a payment). It lets the server tell a "new request" apart from "a retry of the same action," so an operation doesn't accidentally run twice when the network is unreliable.
 
+### When It Happens
+
+**When:** Any time a client can't be sure whether a request actually succeeded — a network timeout, the client crashing before reading the response, or a proxy/load balancer retrying automatically — and then resends the same operation.
+
+**Where to spot it:** Payment/charge endpoints, order creation, sending money or notifications, and any POST/PUT with a side effect that sits behind a mobile client or an unreliable network.
+
 ### Scenario
 
 1. **Client** calls `POST /charge` with header `Idempotency-Key: abc123`
@@ -52,6 +58,12 @@ node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram
 ### Tóm tắt
 
 **Idempotency key** là một token duy nhất do client sinh ra và gửi kèm mỗi request có side effect (ví dụ tạo thanh toán). Nó giúp server phân biệt được "request mới" với "request retry của cùng một hành động", để một thao tác không vô tình bị thực hiện hai lần khi mạng không ổn định.
+
+### Khi Nào Gặp
+
+**Khi nào:** Bất cứ khi nào client không chắc chắn request trước có thành công hay không — timeout mạng, client crash trước khi đọc được response, hoặc proxy/load balancer tự động retry — rồi gửi lại cùng một thao tác đó.
+
+**Ở đâu dễ gặp:** Endpoint thanh toán/charge, tạo đơn hàng, chuyển tiền hoặc gửi thông báo, và bất kỳ POST/PUT nào có side effect nằm sau mobile client hoặc mạng không ổn định.
 
 ### Kịch bản
 

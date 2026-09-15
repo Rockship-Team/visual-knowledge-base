@@ -10,6 +10,12 @@
 
 Illustrates a classic deadlock between two database transactions: each holds a lock the other needs, forming a **circular wait**, and both would block forever without a deadlock detector stepping in.
 
+### When It Happens
+
+**When:** When two or more transactions acquire the same set of locks in a different order under high write concurrency on the same tables or rows.
+
+**Where to spot it:** Batch jobs and API requests updating related rows in reverse order (e.g. transferring between two accounts), ORMs that lock rows implicitly through foreign-key updates, and long-running transactions that touch many tables.
+
 ### Scenario
 
 1. **Transaction A** locks `Row 1` successfully
@@ -50,6 +56,12 @@ node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram
 ### Tóm tắt
 
 Minh họa deadlock kinh điển giữa hai transaction database: mỗi transaction giữ một khóa mà transaction kia đang cần, tạo thành **vòng chờ (circular wait)** và cả hai bị block vĩnh viễn nếu không có deadlock detector can thiệp.
+
+### Khi Nào Gặp
+
+**Khi nào:** Khi hai hay nhiều transaction lấy cùng một tập lock nhưng theo thứ tự khác nhau, dưới tải ghi cao trên cùng bảng hoặc dòng dữ liệu.
+
+**Ở đâu dễ gặp:** Batch job và API cùng update các dòng liên quan theo thứ tự ngược nhau (ví dụ chuyển tiền giữa hai tài khoản), ORM khóa ngầm qua update foreign key, và transaction chạy dài động vào nhiều bảng.
 
 ### Kịch bản
 

@@ -48,6 +48,10 @@
     <h2>Summary</h2>
     <p>The <strong>CAP theorem</strong> says a distributed data system cannot simultaneously guarantee all three properties: <strong>C</strong>onsistency (every node returns the same, most recent data), <strong>A</strong>vailability (every request still gets a response, no error), and <strong>P</strong>artition tolerance (the system keeps working when the network between nodes is split). In practice, Partition tolerance is essentially unavoidable — the network will fail sometimes — so the real question isn't "pick one of three", it's <strong>choosing C or A when a partition happens</strong>.</p>
 
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Whenever a system spans more than one node and the network between them can fail or slow down — at scale, that's a matter of "when", not "if".</p>
+    <p><strong>Where to spot it:</strong> Multi-region databases, service meshes with cross-AZ calls, any replicated datastore (Postgres with read replicas, Cassandra, DynamoDB, etcd), and design reviews where someone asks "what happens if this node can't reach that one?"</p>
+
     <h2>Scenario</h2>
     <ol>
       <li>Normally: the client reads/writes through <strong>Node A</strong> and <strong>Node B</strong>, and the two nodes stay continuously in sync</li>
@@ -77,6 +81,10 @@ node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram
   <div class="prose" data-lang="vi" hidden>
     <h2>Tóm tắt</h2>
     <p><strong>CAP theorem</strong> nói rằng một hệ thống dữ liệu phân tán không thể đồng thời đảm bảo cả 3 tính chất: <strong>C</strong>onsistency (mọi node trả về dữ liệu mới nhất giống nhau), <strong>A</strong>vailability (mọi request đều nhận được response, không lỗi), và <strong>P</strong>artition tolerance (hệ thống vẫn hoạt động khi mạng giữa các node bị chia cắt). Trong thực tế, Partition tolerance gần như bắt buộc phải chấp nhận — mạng sẽ luôn có lúc lỗi — nên câu hỏi thật sự không phải "chọn cái nào trong 3 cái", mà là <strong>chọn C hay A khi partition xảy ra</strong>.</p>
+
+    <h2>Khi Nào Cần Quan Tâm</h2>
+    <p><strong>Khi nào:</strong> Bất cứ khi nào hệ thống trải trên nhiều hơn một node và mạng giữa chúng có thể lỗi hoặc chậm — ở quy mô lớn, đây là chuyện "khi nào" chứ không phải "có xảy ra hay không".</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Database multi-region, service mesh gọi cross-AZ, mọi datastore có replication (Postgres kèm read replica, Cassandra, DynamoDB, etcd), và trong các buổi design review khi có người hỏi "nếu node này không gọi được tới node kia thì sao?"</p>
 
     <h2>Kịch bản</h2>
     <ol>
