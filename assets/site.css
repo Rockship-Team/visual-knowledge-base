@@ -399,6 +399,13 @@ body[data-topic-type="lifecycle"] .topic-meta .badge::before { background: var(-
 }
 
 /* topic page */
+:root { --accent-current: var(--focus); --accent-current-bg: var(--surface-2); }
+body[data-topic-type="architecture"] { --accent-current: var(--type-architecture); --accent-current-bg: var(--type-architecture-bg); }
+body[data-topic-type="workflow"] { --accent-current: var(--type-workflow); --accent-current-bg: var(--type-workflow-bg); }
+body[data-topic-type="sequence"] { --accent-current: var(--type-sequence); --accent-current-bg: var(--type-sequence-bg); }
+body[data-topic-type="dataflow"] { --accent-current: var(--type-dataflow); --accent-current-bg: var(--type-dataflow-bg); }
+body[data-topic-type="lifecycle"] { --accent-current: var(--type-lifecycle); --accent-current-bg: var(--type-lifecycle-bg); }
+
 .topic-title {
   font-size: 1.75rem;
   font-weight: 700;
@@ -410,62 +417,108 @@ body[data-topic-type="lifecycle"] .topic-meta .badge::before { background: var(-
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.85rem;
 }
+
+/* diagram preview: a bounded, consistent-height panel, not a full-viewport app.
+   "Open fullscreen" is the real way to pan/zoom/explore a large diagram. */
 .diagram-block {
   border: 1px solid var(--border);
-  border-top: 3px solid var(--border-strong);
+  border-top: 3px solid var(--accent-current);
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--surface);
-  margin-bottom: 2.25rem;
+  margin-bottom: 2.5rem;
 }
-body[data-topic-type="architecture"] .diagram-block { border-top-color: var(--type-architecture); }
-body[data-topic-type="workflow"] .diagram-block { border-top-color: var(--type-workflow); }
-body[data-topic-type="sequence"] .diagram-block { border-top-color: var(--type-sequence); }
-body[data-topic-type="dataflow"] .diagram-block { border-top-color: var(--type-dataflow); }
-body[data-topic-type="lifecycle"] .diagram-block { border-top-color: var(--type-lifecycle); }
 .diagram-block .bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.6rem 1rem;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem 0.65rem 1rem;
   border-bottom: 1px solid var(--border);
   background: var(--surface-2);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   color: var(--muted);
 }
+.diagram-block .bar > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.diagram-block .bar > span:first-child::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-current);
+  flex: none;
+}
 .diagram-block .bar a {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
   text-decoration: none;
   font-weight: 500;
+  font-size: 0.82rem;
   color: var(--ink);
+  padding: 0.32rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+.diagram-block .bar a:hover {
+  border-color: var(--accent-current);
+  color: var(--accent-current);
 }
 .diagram-block iframe {
   width: 100%;
-  height: 78vh;
-  min-height: 480px;
+  height: 540px;
   border: 0;
   display: block;
   background: var(--bg);
 }
+body[data-topic-type="sequence"] .diagram-block iframe,
+body[data-topic-type="lifecycle"] .diagram-block iframe {
+  height: 600px;
+}
+@media (max-width: 640px) {
+  .diagram-block iframe { height: 420px; }
+}
 
 .prose { max-width: 74ch; }
 .prose h2 {
-  font-size: 1.15rem;
-  font-weight: 600;
-  margin: 2rem 0 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 2.1rem 0 0.9rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--border);
   letter-spacing: -0.005em;
 }
+.prose h2::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--accent-current);
+  flex: none;
+}
 .prose p, .prose li { color: var(--ink); }
-.prose p { margin: 0.55rem 0; }
-.prose ol, .prose ul { padding-left: 1.3rem; margin: 0.55rem 0; }
-.prose li { margin: 0.35rem 0; }
+.prose p { margin: 0.6rem 0; line-height: 1.7; }
+.prose ol, .prose ul { padding-left: 1.3rem; margin: 0.6rem 0; }
+.prose li { margin: 0.4rem 0; line-height: 1.65; }
+.prose strong { color: var(--accent-current); font-weight: 600; }
 .prose code {
   background: var(--surface-2);
   padding: 0.1rem 0.4rem;
   border-radius: 5px;
   font-family: var(--font-mono);
   font-size: 0.86em;
+  color: var(--ink);
 }
 .prose pre {
   background: var(--surface-2);
@@ -477,21 +530,18 @@ body[data-topic-type="lifecycle"] .diagram-block { border-top-color: var(--type-
 .prose pre code {
   background: none;
   padding: 0;
+  color: var(--ink);
 }
 .callout {
-  border-left: 3px solid var(--focus);
-  background: var(--surface-2);
+  border-left: 3px solid var(--accent-current);
+  background: var(--accent-current-bg);
   color: var(--ink);
-  padding: 0.8rem 1.1rem;
+  padding: 0.85rem 1.1rem;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  margin: 1rem 0;
+  margin: 1.1rem 0;
   font-size: 0.94rem;
 }
-body[data-topic-type="architecture"] .callout { border-left-color: var(--type-architecture); }
-body[data-topic-type="workflow"] .callout { border-left-color: var(--type-workflow); }
-body[data-topic-type="sequence"] .callout { border-left-color: var(--type-sequence); }
-body[data-topic-type="dataflow"] .callout { border-left-color: var(--type-dataflow); }
-body[data-topic-type="lifecycle"] .callout { border-left-color: var(--type-lifecycle); }
+.callout strong { color: inherit; }
 
 footer.site-footer {
   margin-top: 3.5rem;
