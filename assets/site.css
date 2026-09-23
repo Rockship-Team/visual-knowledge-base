@@ -411,7 +411,6 @@ body[data-topic-type="lifecycle"] { --accent-current: var(--type-lifecycle); --a
   font-weight: 700;
   margin: 0.2rem 0 0.6rem;
   letter-spacing: -0.02em;
-  max-width: 34ch;
 }
 .topic-meta {
   display: flex;
