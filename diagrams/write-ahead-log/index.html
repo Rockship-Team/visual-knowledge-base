@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Write-Ahead Log: Durability Before the Data Page Is Flushed — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/write-ahead-log" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Write-Ahead Log: Durability Before the Data Page Is Flushed</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">database</span>
+    <span class="tag">durability</span>
+    <span class="tag">storage-engine</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Write-ahead log durability and crash recovery sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Shows why a database engine writes to a <strong>Write-Ahead Log (WAL)</strong> before it acknowledges a commit, and how that log is what lets the engine <strong>recover</strong> a committed change that never made it to the actual data page before a crash.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> On every single write — the engine always has to decide what "durable" means before it can safely tell the client the transaction committed.</p>
+    <p><strong>Where to spot it:</strong> Database crash recovery logs on startup, <code>fsync</code>-related tuning knobs (<code>synchronous_commit</code>, <code>innodb_flush_log_at_trx_commit</code>), and any incident postmortem asking "how did we not lose that write when the box died?"</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li>A <strong>Client</strong> sends an update. The <strong>DB Engine</strong> appends the change to the <strong>WAL</strong> and waits for it to <code>fsync</code> to disk.</li>
+      <li>Only once the log entry is durable does the engine tell the client the write is committed — the actual data page hasn't been touched yet.</li>
+      <li>The engine starts flushing the dirty data page, but the process <strong>crashes</strong> right in the middle of it.</li>
+      <li>On restart, <strong>recovery</strong> replays the WAL from the last checkpoint, finds the committed-but-unflushed operation, and re-applies it to the data page.</li>
+    </ol>
+    <p class="callout">The client's "committed" was true the whole time — durability came from the log being on disk, not from the data page being up to date.</p>
+
+    <h2>Why Log Before Touching the Data</h2>
+    <ul>
+      <li>Appending to a sequential log is one fast, predictable disk operation — no seeking around a B-tree page</li>
+      <li>Updating the actual data page can be deferred and batched, off the write's critical path, without risking durability</li>
+      <li>The client's "committed" only needs the log entry to be on disk, not the final page layout</li>
+    </ul>
+
+    <h2>What Recovery Actually Does</h2>
+    <ul>
+      <li>On restart, the engine finds the last checkpoint and replays every WAL entry written after it</li>
+      <li>Any operation the log says was committed, but whose data page never made it to disk, gets re-applied</li>
+      <li>This is called redo recovery — it never has to ask the client to resend anything</li>
+    </ul>
+
+    <h2>Where This Shows Up</h2>
+    <ul>
+      <li>PostgreSQL's WAL and MySQL/InnoDB's redo log</li>
+      <li>SQLite's WAL journal mode</li>
+      <li>LSM-tree engines (RocksDB, Cassandra) still write a WAL before the write ever reaches the memtable</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/write-ahead-log/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Minh họa vì sao một database engine ghi vào <strong>Write-Ahead Log (WAL)</strong> trước khi xác nhận commit, và vì sao chính log này giúp engine <strong>khôi phục</strong> một thay đổi đã commit nhưng chưa kịp ghi vào data page thực tế trước khi crash.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Ở mọi lần ghi — engine luôn phải quyết định "durable" nghĩa là gì trước khi có thể an toàn báo client rằng transaction đã commit.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Log khôi phục sau crash lúc database khởi động, các tham số tinh chỉnh liên quan <code>fsync</code> (<code>synchronous_commit</code>, <code>innodb_flush_log_at_trx_commit</code>), và bất kỳ bản postmortem sự cố nào hỏi "sao máy chết mà không mất lần ghi đó?"</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> gửi một update. <strong>DB Engine</strong> append thay đổi vào <strong>WAL</strong> và đợi nó <code>fsync</code> xuống đĩa.</li>
+      <li>Chỉ khi log entry đã bền vững (durable), engine mới báo client ghi đã commit — data page thực tế vẫn chưa hề bị đụng đến.</li>
+      <li>Engine bắt đầu flush dirty data page, nhưng tiến trình <strong>crash</strong> ngay giữa chừng.</li>
+      <li>Khi khởi động lại, quá trình <strong>recovery</strong> replay WAL từ checkpoint gần nhất, tìm ra thao tác đã commit nhưng chưa flush, và áp dụng lại vào data page.</li>
+    </ol>
+    <p class="callout">"Committed" mà client nhận được luôn đúng — durability đến từ việc log đã nằm trên đĩa, không phải từ việc data page đã cập nhật.</p>
+
+    <h2>Vì Sao Log Trước Khi Đụng Vào Data</h2>
+    <ul>
+      <li>Append vào một log tuần tự là một thao tác đĩa nhanh, dễ đoán — không cần seek quanh một page B-tree</li>
+      <li>Việc cập nhật data page thực tế có thể trì hoãn và gộp lại, nằm ngoài đường găng của lần ghi, mà không đánh đổi durability</li>
+      <li>"Committed" của client chỉ cần log entry nằm trên đĩa, không cần layout page cuối cùng đã đúng</li>
+    </ul>
+
+    <h2>Recovery Thực Sự Làm Gì</h2>
+    <ul>
+      <li>Khi khởi động lại, engine tìm checkpoint gần nhất và replay mọi WAL entry ghi sau đó</li>
+      <li>Bất kỳ thao tác nào log nói là đã commit, nhưng data page chưa kịp ghi xuống đĩa, sẽ được áp dụng lại</li>
+      <li>Đây gọi là redo recovery — không bao giờ cần yêu cầu client gửi lại bất cứ gì</li>
+    </ul>
+
+    <h2>Ở Đâu Dễ Gặp</h2>
+    <ul>
+      <li>WAL của PostgreSQL và redo log của MySQL/InnoDB</li>
+      <li>Chế độ WAL journal của SQLite</li>
+      <li>Các engine LSM-tree (RocksDB, Cassandra) vẫn ghi WAL trước khi lần ghi chạm tới memtable</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/write-ahead-log/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

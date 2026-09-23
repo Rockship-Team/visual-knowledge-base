@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Snapshot Isolation via MVCC: Readers Never Block Writers",
+    "output": "diagrams/snapshot-isolation-mvcc/diagram.html",
+    "viewBox": [1000, 780],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "txn_a", "type": "external", "label": "Transaction A", "sublabel": "long-running report" },
+    { "id": "txn_b", "type": "external", "label": "Transaction B", "sublabel": "updates the row, commits fast" },
+    { "id": "mvcc_store", "type": "database", "label": "MVCC Store", "sublabel": "keeps multiple row versions" }
+  ],
+  "segments": [
+    { "from": 145, "to": 250, "label": "A starts and takes a snapshot — it will only ever see v1" },
+    { "from": 250, "to": 435, "label": "B writes and commits, creating v2 — without blocking or being blocked by A" },
+    { "from": 435, "to": 585, "label": "A reads again — still sees v1, its original snapshot, never v2" }
+  ],
+  "messages": [
+    { "id": "a-begin", "from": "txn_a", "to": "mvcc_store", "y": 160, "label": "BEGIN (snapshot @ txn 100)", "variant": "default" },
+    { "id": "a-select-1", "from": "txn_a", "to": "mvcc_store", "y": 195, "label": "SELECT balance", "variant": "default" },
+    { "id": "a-select-1-ret", "from": "mvcc_store", "to": "txn_a", "y": 230, "label": "balance = 100 (v1)", "variant": "return" },
+    { "id": "b-begin", "from": "txn_b", "to": "mvcc_store", "y": 270, "label": "BEGIN (txn 101)", "variant": "default" },
+    { "id": "b-update", "from": "txn_b", "to": "mvcc_store", "y": 305, "label": "UPDATE balance = 150 (creates v2)", "variant": "default" },
+    { "id": "b-update-ret", "from": "mvcc_store", "to": "txn_b", "y": 340, "label": "OK", "variant": "return" },
+    { "id": "b-commit", "from": "txn_b", "to": "mvcc_store", "y": 380, "label": "COMMIT (v2 now visible to new txns)", "variant": "default" },
+    { "id": "b-commit-ret", "from": "mvcc_store", "to": "txn_b", "y": 415, "label": "committed", "variant": "return" },
+    { "id": "a-select-2", "from": "txn_a", "to": "mvcc_store", "y": 455, "label": "SELECT balance (same snapshot)", "variant": "default" },
+    { "id": "a-select-2-ret", "from": "mvcc_store", "to": "txn_a", "y": 490, "label": "balance = 100 (still v1)", "variant": "emphasis" },
+    { "id": "a-commit", "from": "txn_a", "to": "mvcc_store", "y": 530, "label": "COMMIT (txn 100)", "variant": "default" },
+    { "id": "a-commit-ret", "from": "mvcc_store", "to": "txn_a", "y": 565, "label": "committed", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "mvcc_store", "from": 165, "to": 235, "type": "database" },
+    { "participant": "mvcc_store", "from": 275, "to": 420, "type": "database" },
+    { "participant": "mvcc_store", "from": 460, "to": 570, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "How Snapshot Isolation Avoids Blocking",
+      "items": [
+        "Every transaction reads the version of each row that was committed at the moment its own snapshot was taken",
+        "Writers never block readers and readers never block writers, because they simply operate on different versions of the same row",
+        "No read locks are needed — this is why MVCC scales so much better than lock-based isolation under mixed read/write load"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "The Trade-off: Write Skew",
+      "items": [
+        "Snapshot Isolation prevents dirty reads and non-repeatable reads, but not Write Skew",
+        "Two transactions can each read overlapping data, both pass a check that looked safe, and both commit — together violating an invariant neither one alone would have broken",
+        "Serializable Snapshot Isolation (SSI) closes this gap by detecting the dangerous read/write pattern and aborting one transaction"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Old Versions Have a Cost",
+      "items": [
+        "A row version can't be deleted the instant it's superseded — some other transaction's snapshot might still need it",
+        "A background process (e.g. PostgreSQL's VACUUM) reclaims versions only once no active snapshot could possibly reference them",
+        "Long-running transactions delay this cleanup and are a common cause of table bloat"
+      ]
+    }
+  ]
+}

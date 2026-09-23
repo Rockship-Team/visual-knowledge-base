@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Partitioning: Consistent Hashing vs Modulo Hashing — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/consistent-hashing-partitioning" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Partitioning: Consistent Hashing vs Modulo Hashing</h1>
+  <div class="topic-meta">
+    <span class="badge">workflow</span>
+    <span class="tag">partitioning</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">database</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Consistent hashing vs modulo hashing workflow diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Compares what happens to a cluster's keys when it scales from 3 to 4 nodes under two partitioning strategies: <strong>modulo hashing</strong> (<code>key % N</code>), which reshuffles almost everything, versus <strong>consistent hashing</strong> (a hash ring), which only moves the keys that belong to the new node.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Every time a distributed data store adds or removes a node — the partitioning scheme decides how much data has to move as a result.</p>
+    <p><strong>Where to spot it:</strong> Scaling out a sharded cache or database, evaluating a client-side sharding library, or explaining why one system handles rebalancing gracefully while another needs a maintenance window.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li>A <strong>3-node cluster</strong> holding millions of keys needs to scale out to 4 nodes.</li>
+      <li><strong>Modulo hashing path:</strong> each key's owner is <code>hash(key) % N</code>. The moment N changes from 3 to 4, almost every key's assigned position shifts — roughly 75% of keys move.</li>
+      <li><strong>Consistent hashing path:</strong> nodes and keys share one hash ring; a key belongs to the first node clockwise from its position. Adding node N4 only steals the arc of keys between it and its clockwise neighbor — roughly 25% of keys move, and only from one node.</li>
+    </ol>
+    <p class="callout">Same operation, wildly different blast radius: consistent hashing turns "add one node" into a local, bounded change instead of a cluster-wide rehash.</p>
+
+    <h2>Root Cause</h2>
+    <ul>
+      <li>Modulo hashing bakes the total node count N directly into every key's placement formula — change N, and the formula's output changes for nearly every key</li>
+      <li>Consistent hashing decouples key placement from the node count: a key's ring position never changes, only which node currently owns the arc containing it</li>
+      <li>Virtual nodes (multiple ring positions per physical node) smooth out uneven load from an unlucky hash distribution</li>
+    </ul>
+
+    <h2>How to Choose</h2>
+    <ul>
+      <li>Use <strong>consistent hashing</strong> whenever the cluster is expected to grow, shrink, or fail over nodes while staying online</li>
+      <li>Modulo hashing can still be fine for a fixed-size cluster that's never expected to be resized live</li>
+      <li>Watch load distribution after rebalancing — a poor hash function or too few virtual nodes can still leave some nodes hotter than others</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/consistent-hashing-partitioning/spec.workflow.json" target="_blank" rel="noopener">spec.workflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate workflow path/to/spec.workflow.json --quality showcase --json
+node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>So sánh điều gì xảy ra với các key của một cluster khi mở rộng từ 3 lên 4 node theo hai chiến lược partitioning: <strong>modulo hashing</strong> (<code>key % N</code>), làm xáo trộn gần như toàn bộ, so với <strong>consistent hashing</strong> (hash ring), chỉ di chuyển đúng các key thuộc về node mới.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Mỗi khi một hệ thống lưu trữ phân tán thêm hoặc bớt node — cách partitioning quyết định bao nhiêu dữ liệu phải di chuyển theo.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Mở rộng một cache/database được shard, đánh giá thư viện client-side sharding, hoặc giải thích vì sao hệ thống này rebalance êm ru trong khi hệ thống khác cần cửa sổ bảo trì.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li>Một <strong>cluster 3 node</strong> chứa hàng triệu key cần mở rộng lên 4 node.</li>
+      <li><strong>Đường modulo hashing:</strong> chủ sở hữu mỗi key là <code>hash(key) % N</code>. Ngay khi N đổi từ 3 sang 4, vị trí gán của gần như mọi key đều thay đổi — khoảng 75% key phải di chuyển.</li>
+      <li><strong>Đường consistent hashing:</strong> node và key cùng nằm trên một hash ring; một key thuộc về node đầu tiên gặp theo chiều kim đồng hồ từ vị trí của nó. Thêm node N4 chỉ lấy đi phần cung giữa nó và hàng xóm liền kề theo chiều kim đồng hồ — khoảng 25% key di chuyển, và chỉ từ một node.</li>
+    </ol>
+    <p class="callout">Cùng một thao tác, phạm vi ảnh hưởng khác nhau hoàn toàn: consistent hashing biến "thêm một node" thành một thay đổi cục bộ, có giới hạn, thay vì rehash toàn cluster.</p>
+
+    <h2>Nguyên nhân</h2>
+    <ul>
+      <li>Modulo hashing gắn chặt tổng số node N vào công thức tính vị trí của mọi key — đổi N, kết quả công thức thay đổi với gần như mọi key</li>
+      <li>Consistent hashing tách rời vị trí key khỏi số lượng node: vị trí của key trên ring không bao giờ đổi, chỉ có node nào đang sở hữu phần cung chứa nó là thay đổi</li>
+      <li>Virtual node (nhiều vị trí trên ring cho mỗi node vật lý) giúp san đều tải khi hàm hash phân bố không may mắn</li>
+    </ul>
+
+    <h2>Cách lựa chọn</h2>
+    <ul>
+      <li>Dùng <strong>consistent hashing</strong> bất cứ khi nào cluster dự kiến sẽ tăng, giảm, hoặc failover node trong lúc vẫn online</li>
+      <li>Modulo hashing vẫn ổn cho cluster kích thước cố định, không bao giờ resize khi đang chạy</li>
+      <li>Theo dõi phân bố tải sau khi rebalance — hàm hash kém hoặc quá ít virtual node vẫn có thể khiến vài node nóng hơn hẳn</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/consistent-hashing-partitioning/spec.workflow.json" target="_blank" rel="noopener">spec.workflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate workflow path/to/spec.workflow.json --quality showcase --json
+node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

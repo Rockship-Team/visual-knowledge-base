@@ -1,0 +1,69 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Partitioning: Consistent Hashing vs Modulo Hashing",
+    "output": "diagram.html",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    { "id": "flow", "label": "Main Path" },
+    { "id": "naive_lane", "label": "Modulo Hashing (key % N)", "variant": "exception" },
+    { "id": "consistent_lane", "label": "Consistent Hashing (hash ring)" }
+  ],
+  "phases": [
+    { "id": "incoming", "label": "Cluster Scales Out", "fromCol": 0, "toCol": 1 },
+    { "id": "strategy", "label": "Rebalancing Strategy", "fromCol": 2, "toCol": 2, "variant": "emphasis" },
+    { "id": "result", "label": "Keys Remapped", "fromCol": 3, "toCol": 3 }
+  ],
+  "mainPath": [
+    "cluster",
+    "add_node",
+    "consistent_remap",
+    "consistent_result"
+  ],
+  "nodes": [
+    { "id": "cluster", "lane": "flow", "col": 0, "type": "database", "label": "3-Node Cluster", "sublabel": "millions of keys stored", "width": 150 },
+    { "id": "add_node", "lane": "flow", "col": 1, "type": "backend", "label": "Add Node N4", "sublabel": "scale out from 3 to 4", "width": 150 },
+    { "id": "naive_remap", "lane": "naive_lane", "col": 2, "type": "database", "label": "Rehash key % N", "sublabel": "N changed from 3 to 4", "width": 170 },
+    { "id": "consistent_remap", "lane": "consistent_lane", "col": 2, "type": "database", "label": "Insert on Hash Ring", "sublabel": "N4 owns one arc of the ring", "width": 170 },
+    { "id": "naive_result", "lane": "naive_lane", "col": 3, "type": "external", "label": "~75% of Keys Move", "sublabel": "mass rehash, cache stampede", "width": 170 },
+    { "id": "consistent_result", "lane": "consistent_lane", "col": 3, "type": "external", "label": "~25% of Keys Move", "sublabel": "only N4's arc changes owner", "width": 170 }
+  ],
+  "edges": [
+    { "id": "cluster-add", "from": "cluster", "to": "add_node", "variant": "default" },
+    { "id": "add-naive", "from": "add_node", "to": "naive_remap", "label": "modulo hashing", "variant": "dashed", "role": "branch" },
+    { "id": "add-consistent", "from": "add_node", "to": "consistent_remap", "label": "consistent hashing", "variant": "emphasis", "role": "branch" },
+    { "id": "naive-result", "from": "naive_remap", "to": "naive_result", "variant": "dashed", "role": "return" },
+    { "id": "consistent-result", "from": "consistent_remap", "to": "consistent_result", "variant": "default", "role": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Why Modulo Hashing Falls Apart",
+      "items": [
+        "A key's owner is computed as hash(key) % N, so N itself is baked into every key's placement",
+        "The moment N changes — adding or removing even one node — almost every key's assigned position shifts",
+        "The whole cluster has to rehash and move nearly all of its data at once, right when it's already under load from scaling"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "How Consistent Hashing Limits the Blast Radius",
+      "items": [
+        "Both nodes and keys are placed on the same hash ring; a key belongs to the first node found going clockwise from its position",
+        "Adding a node only takes over the arc of keys between it and its clockwise neighbor — every other node's keys stay put",
+        "Virtual nodes (multiple ring positions per physical node) smooth out uneven load from an unlucky hash distribution"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Where This Shows Up",
+      "items": [
+        "Amazon Dynamo, Apache Cassandra, and DynamoDB's partitioning layer",
+        "Memcached client-side sharding (the classic \"ketama\" algorithm)",
+        "CDN and load balancer request routing that needs to stay sticky as backend pools resize"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Change Data Capture: Streaming Database Changes — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/change-data-capture" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Change Data Capture: Streaming Database Changes</h1>
+  <div class="topic-meta">
+    <span class="badge">dataflow</span>
+    <span class="tag">streaming</span>
+    <span class="tag">database</span>
+    <span class="tag">integration</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Change data capture dataflow diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Shows how <strong>Change Data Capture (CDC)</strong> turns every row-level change in a database into a stream of events, by tailing the database's own transaction log instead of polling tables — letting a search index, a cache, and a data warehouse all stay in sync independently.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Whenever data written to one system needs to reach other systems (search, cache, analytics) in near real time, without adding query load to the source database.</p>
+    <p><strong>Where to spot it:</strong> Keeping a search index in sync with a primary database, invalidating a cache the moment the underlying row changes, and streaming ETL pipelines that replace nightly batch jobs (Debezium, AWS DMS, Maxwell).</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li>An <strong>Application</strong> performs an <code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code> against the <strong>Primary DB</strong>.</li>
+      <li>The change is already recorded in the database's own <strong>transaction log</strong> (WAL / binlog) — this happens regardless of CDC, since it's how the database guarantees durability.</li>
+      <li>A <strong>CDC Connector</strong> (e.g. Debezium) tails that log and turns each committed row change into an event.</li>
+      <li>The connector publishes the event onto an <strong>Event Stream</strong>, one topic per table.</li>
+      <li><strong>Downstream consumers</strong> — a search index, a cache, a data warehouse — each read the same stream independently, at their own pace.</li>
+    </ol>
+    <p class="callout">The database never has to know CDC exists — the connector just reads a log the engine was already writing for its own durability guarantees.</p>
+
+    <h2>Why Tail the Log Instead of Polling</h2>
+    <ul>
+      <li>Reading the transaction log captures every change, including deletes, with no extra query load on the production database</li>
+      <li>It never misses a row that changed and changed back between two poll intervals</li>
+      <li>Each downstream consumer reads the same stream independently, at its own pace</li>
+    </ul>
+
+    <h2>What CDC Guarantees (and What It Doesn't)</h2>
+    <ul>
+      <li>Changes are delivered in commit order per row — but at-least-once, so a connector restart can redeliver the same event</li>
+      <li>Downstream consumers must apply changes idempotently, exactly like any other message-queue consumer</li>
+      <li>CDC doesn't rewrite your data model — it mirrors whatever the source table's schema already is</li>
+    </ul>
+
+    <h2>Where It Breaks Down</h2>
+    <ul>
+      <li>Schema changes (DDL) need special handling so the connector adapts without silently dropping events</li>
+      <li>A connector that falls too far behind can be evicted from the log's retention window, forcing a full table resnapshot</li>
+      <li>High-churn tables can produce more change events than downstream consumers can keep up with</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/change-data-capture/spec.dataflow.json" target="_blank" rel="noopener">spec.dataflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate dataflow path/to/spec.dataflow.json --quality showcase --json
+node bin/archify.mjs deliver dataflow path/to/spec.dataflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Minh họa cách <strong>Change Data Capture (CDC)</strong> biến mọi thay đổi cấp dòng trong database thành một luồng event, bằng cách tail chính transaction log của database thay vì poll bảng — cho phép search index, cache, và data warehouse đều tự đồng bộ độc lập.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất cứ khi nào dữ liệu ghi vào một hệ thống cần đến các hệ thống khác (search, cache, analytics) gần như tức thời, mà không thêm tải query lên database nguồn.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Giữ search index đồng bộ với database chính, invalidate cache ngay khi dòng dữ liệu gốc thay đổi, và pipeline streaming ETL thay thế batch job chạy đêm (Debezium, AWS DMS, Maxwell).</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li>Một <strong>Application</strong> thực hiện <code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code> vào <strong>Primary DB</strong>.</li>
+      <li>Thay đổi đã được ghi vào <strong>transaction log</strong> (WAL / binlog) của chính database — điều này xảy ra bất kể có CDC hay không, vì đó là cách database đảm bảo durability.</li>
+      <li>Một <strong>CDC Connector</strong> (ví dụ Debezium) tail log đó và biến mỗi thay đổi dòng đã commit thành một event.</li>
+      <li>Connector publish event lên <strong>Event Stream</strong>, mỗi bảng một topic.</li>
+      <li><strong>Các consumer</strong> — search index, cache, data warehouse — mỗi bên đọc cùng luồng đó một cách độc lập, theo tốc độ riêng.</li>
+    </ol>
+    <p class="callout">Database không bao giờ cần biết CDC tồn tại — connector chỉ đọc một log mà engine vốn đã ghi cho chính đảm bảo durability của nó.</p>
+
+    <h2>Vì Sao Tail Log Thay Vì Poll</h2>
+    <ul>
+      <li>Đọc transaction log bắt được mọi thay đổi, kể cả delete, mà không thêm tải query lên database production</li>
+      <li>Không bao giờ bỏ sót một dòng thay đổi rồi đổi lại giữa hai lần poll</li>
+      <li>Mỗi consumer downstream đọc cùng luồng một cách độc lập, theo tốc độ riêng của nó</li>
+    </ul>
+
+    <h2>CDC Đảm Bảo Gì (và Không Đảm Bảo Gì)</h2>
+    <ul>
+      <li>Thay đổi được gửi theo đúng thứ tự commit trên mỗi dòng — nhưng là at-least-once, nên connector restart có thể gửi lại cùng event</li>
+      <li>Consumer downstream phải áp dụng thay đổi một cách idempotent, giống hệt bất kỳ consumer message-queue nào khác</li>
+      <li>CDC không viết lại data model của bạn — nó phản chiếu đúng schema của bảng nguồn</li>
+    </ul>
+
+    <h2>Ở Đâu Dễ Gãy</h2>
+    <ul>
+      <li>Thay đổi schema (DDL) cần xử lý đặc biệt để connector thích ứng mà không âm thầm bỏ sót event</li>
+      <li>Một connector bị trễ quá xa có thể bị đẩy ra khỏi cửa sổ retention của log, buộc phải resnapshot toàn bộ bảng</li>
+      <li>Bảng có tần suất thay đổi cao có thể tạo ra nhiều event hơn khả năng consumer downstream theo kịp</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/change-data-capture/spec.dataflow.json" target="_blank" rel="noopener">spec.dataflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate dataflow path/to/spec.dataflow.json --quality showcase --json
+node bin/archify.mjs deliver dataflow path/to/spec.dataflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Multi-Leader Replication: Write Conflicts and Resolution — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/multi-leader-replication-conflicts" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Multi-Leader Replication: Write Conflicts and Resolution</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">replication</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">database</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Multi-leader replication write conflict sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Shows how <strong>multi-leader replication</strong> lets two leaders in two regions accept writes to the same record at nearly the same moment — and how the system detects and resolves the resulting conflict once the leaders exchange writes.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Any time more than one node can accept writes for the same piece of data independently, and those writes can happen concurrently before either node learns about the other's write.</p>
+    <p><strong>Where to spot it:</strong> Multi-region active-active databases, offline-first mobile apps syncing changes made while disconnected, collaborative editing tools, and any "last write wins" field you've seen in a database's documentation.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Client A</strong> writes <code>title = 'Hello'</code> to <strong>Leader A (EU)</strong> at <code>14:00:00.001</code>.</li>
+      <li>At nearly the same instant, <strong>Client B</strong> writes <code>title = 'Hi'</code> to <strong>Leader B (US)</strong> at <code>14:00:00.004</code>. Neither leader knows about the other's write yet.</li>
+      <li>The leaders replicate to each other and each one now holds two conflicting values for the same key.</li>
+      <li>Both resolve the conflict the same deterministic way — Last-Write-Wins by timestamp — so they agree: <code>'Hi'</code> wins because its timestamp is later.</li>
+      <li>Both clients eventually see the same converged value, <code>title = 'Hi'</code> — Client A's write is silently gone.</li>
+    </ol>
+    <p class="callout">Multi-leader replication trades a hard consistency guarantee for the ability to accept writes in more than one place at once — the price is that conflicts are a normal, expected event, not a bug.</p>
+
+    <h2>Root Cause</h2>
+    <ul>
+      <li>Two leaders can each accept a write to the same key with neither aware of the other, since accepting writes locally is exactly the point of multi-leader replication</li>
+      <li>By the time the writes are exchanged, both leaders have already told their own client the write succeeded</li>
+      <li>Something has to pick one outcome deterministically so every replica ends up agreeing on the same final value</li>
+    </ul>
+
+    <h2>Common Resolution Strategies</h2>
+    <ul>
+      <li><strong>Last-Write-Wins (LWW):</strong> keep the write with the latest timestamp, silently discard the other — simple, but the discarded write is gone for good</li>
+      <li><strong>Merge:</strong> for structures like sets or counters, combine both writes instead of picking one — this is what CRDTs (Conflict-free Replicated Data Types) are built for</li>
+      <li><strong>Application-level resolution:</strong> store both versions as siblings and let the application, or a human, decide — this is how Amazon Dynamo originally handled it</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/multi-leader-replication-conflicts/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Minh họa cách <strong>multi-leader replication</strong> cho phép hai leader ở hai vùng nhận ghi vào cùng một record gần như đồng thời — và cách hệ thống phát hiện, giải quyết xung đột sau khi hai leader trao đổi dữ liệu ghi.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất cứ khi nào nhiều hơn một node có thể độc lập nhận ghi cho cùng một dữ liệu, và các lần ghi đó có thể xảy ra đồng thời trước khi node này biết về lần ghi của node kia.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Database active-active đa vùng, ứng dụng mobile offline-first đồng bộ thay đổi thực hiện lúc mất kết nối, công cụ chỉnh sửa cộng tác, và bất kỳ field "last write wins" nào bạn từng thấy trong tài liệu database.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client A</strong> ghi <code>title = 'Hello'</code> vào <strong>Leader A (EU)</strong> lúc <code>14:00:00.001</code>.</li>
+      <li>Gần như cùng lúc, <strong>Client B</strong> ghi <code>title = 'Hi'</code> vào <strong>Leader B (US)</strong> lúc <code>14:00:00.004</code>. Chưa leader nào biết về lần ghi của leader kia.</li>
+      <li>Hai leader replicate cho nhau và mỗi bên giờ có hai giá trị xung đột cho cùng một key.</li>
+      <li>Cả hai giải quyết xung đột theo cùng một cách tất định — Last-Write-Wins theo timestamp — nên đồng thuận: <code>'Hi'</code> thắng vì timestamp muộn hơn.</li>
+      <li>Cả hai client cuối cùng đều thấy cùng giá trị hội tụ, <code>title = 'Hi'</code> — lần ghi của Client A âm thầm biến mất.</li>
+    </ol>
+    <p class="callout">Multi-leader replication đánh đổi đảm bảo consistency chặt chẽ để lấy khả năng nhận ghi ở nhiều nơi cùng lúc — cái giá là xung đột trở thành sự kiện bình thường, được lường trước, chứ không phải bug.</p>
+
+    <h2>Nguyên nhân</h2>
+    <ul>
+      <li>Hai leader có thể mỗi bên nhận ghi vào cùng key mà không biết về nhau, vì nhận ghi tại chỗ chính là mục đích của multi-leader replication</li>
+      <li>Đến lúc trao đổi dữ liệu ghi, cả hai leader đã báo client của mình rằng ghi thành công</li>
+      <li>Phải có một cơ chế chọn ra kết quả cuối cùng một cách tất định để mọi replica đồng thuận cùng một giá trị</li>
+    </ul>
+
+    <h2>Các chiến lược giải quyết phổ biến</h2>
+    <ul>
+      <li><strong>Last-Write-Wins (LWW):</strong> giữ lần ghi có timestamp muộn nhất, âm thầm bỏ lần còn lại — đơn giản, nhưng lần ghi bị bỏ mất vĩnh viễn</li>
+      <li><strong>Merge:</strong> với các cấu trúc như set hay counter, gộp cả hai lần ghi thay vì chọn một — đây chính là mục đích của CRDT (Conflict-free Replicated Data Types)</li>
+      <li><strong>Giải quyết ở tầng ứng dụng:</strong> lưu cả hai phiên bản như các sibling và để ứng dụng, hoặc con người, quyết định — cách Amazon Dynamo từng làm</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/multi-leader-replication-conflicts/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

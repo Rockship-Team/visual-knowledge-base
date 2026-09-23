@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Multi-Leader Replication: Write Conflicts and Resolution",
+    "output": "diagrams/multi-leader-replication-conflicts/diagram.html",
+    "viewBox": [980, 560],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "client_a", "type": "external", "label": "Client A", "sublabel": "writes in the EU region" },
+    { "id": "leader_a", "type": "database", "label": "Leader A (EU)", "sublabel": "accepts local writes" },
+    { "id": "leader_b", "type": "database", "label": "Leader B (US)", "sublabel": "accepts local writes" },
+    { "id": "client_b", "type": "external", "label": "Client B", "sublabel": "writes in the US region" }
+  ],
+  "segments": [
+    { "from": 145, "to": 190, "label": "Two clients write the same key concurrently, each to their own leader" },
+    { "from": 190, "to": 270, "label": "Leaders exchange the write via cross-region replication" },
+    { "from": 270, "to": 320, "label": "Conflict resolved deterministically (Last-Write-Wins by timestamp)" },
+    { "from": 320, "to": 400, "label": "Both clients eventually see the same converged value" }
+  ],
+  "messages": [
+    { "id": "a-write", "from": "client_a", "to": "leader_a", "y": 160, "label": "SET title = 'Hello' @14:00:00.001", "variant": "default" },
+    { "id": "b-write", "from": "client_b", "to": "leader_b", "y": 160, "label": "SET title = 'Hi' @14:00:00.004", "variant": "default" },
+    { "id": "a-replicate", "from": "leader_a", "to": "leader_b", "y": 215, "label": "REPLICATE 'Hello' @...001", "variant": "default" },
+    { "id": "b-replicate", "from": "leader_b", "to": "leader_a", "y": 245, "label": "REPLICATE 'Hi' @...004", "variant": "default" },
+    { "id": "resolve", "from": "leader_b", "to": "leader_a", "y": 295, "label": "Resolved via LWW: 'Hi' wins (later timestamp)", "variant": "emphasis" },
+    { "id": "a-final", "from": "leader_a", "to": "client_a", "y": 345, "label": "Final value: title = 'Hi'", "variant": "return" },
+    { "id": "b-final", "from": "leader_b", "to": "client_b", "y": 345, "label": "Final value: title = 'Hi'", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "leader_a", "from": 165, "to": 355, "type": "database" },
+    { "participant": "leader_b", "from": 165, "to": 355, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Why Multi-Leader Needs Conflict Resolution",
+      "items": [
+        "Two leaders can each accept a write to the same key at nearly the same moment, with neither aware of the other",
+        "By the time they replicate to each other, both already told their own client the write succeeded",
+        "Something has to pick one outcome so every replica converges to the same value"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Common Resolution Strategies",
+      "items": [
+        "Last-Write-Wins (LWW): keep the write with the latest timestamp, silently discard the other — simple, but the discarded write is gone for good",
+        "Merge: for structures like sets or counters, combine both writes instead of picking one (CRDTs)",
+        "Application-level resolution: store both versions as siblings and let the application (or the user) decide, as Amazon Dynamo originally did"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Where This Shows Up",
+      "items": [
+        "Multi-region active-active databases (CockroachDB, Cassandra, Cosmos DB)",
+        "Offline-first mobile/collaborative apps that sync changes made while disconnected",
+        "Git itself: two branches editing the same line is a conflict a human has to resolve, same root problem"
+      ]
+    }
+  ]
+}

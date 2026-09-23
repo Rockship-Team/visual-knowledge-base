@@ -163,6 +163,21 @@
           <span class="tag">consensus</span>
         </div>
       </a>
+
+      <a class="card"
+         href="diagrams/multi-leader-replication-conflicts/"
+         data-type="sequence"
+         data-search="multi-leader replication write conflict last-write-wins lww crdt distributed-systems database">
+        <h2>Multi-Leader Replication: Write Conflicts and Resolution</h2>
+        <p class="desc" data-lang="en">Two leaders in two regions each accept a write to the same record concurrently — the diagram shows how the conflict is detected and resolved once they replicate to each other.</p>
+        <p class="desc" data-lang="vi" hidden>Hai leader ở hai vùng cùng nhận ghi vào một record gần như đồng thời — diagram cho thấy xung đột được phát hiện và giải quyết ra sao khi hai bên replicate cho nhau.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">replication</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">database</span>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -247,6 +262,51 @@
           <span class="tag">indexing</span>
         </div>
       </a>
+
+      <a class="card"
+         href="diagrams/consistent-hashing-partitioning/"
+         data-type="workflow"
+         data-search="consistent hashing partitioning modulo hash ring rebalancing sharding distributed-systems">
+        <h2>Partitioning: Consistent Hashing vs Modulo Hashing</h2>
+        <p class="desc" data-lang="en">Adding a node under modulo hashing reshuffles almost every key; a hash ring only moves the keys that belong to the new node.</p>
+        <p class="desc" data-lang="vi" hidden>Thêm một node với modulo hashing làm xáo trộn gần như mọi key; hash ring chỉ di chuyển đúng các key thuộc về node mới.</p>
+        <div class="meta-row">
+          <span class="badge">workflow</span>
+          <span class="tag">partitioning</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">database</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/snapshot-isolation-mvcc/"
+         data-type="sequence"
+         data-search="snapshot isolation mvcc multi-version concurrency control write skew database transactions">
+        <h2>Snapshot Isolation via MVCC: Readers Never Block Writers</h2>
+        <p class="desc" data-lang="en">A long-running transaction keeps reading its own consistent snapshot while another transaction writes and commits a new version of the same row, with neither blocking the other.</p>
+        <p class="desc" data-lang="vi" hidden>Một transaction chạy lâu vẫn đọc đúng snapshot nhất quán của nó trong khi transaction khác ghi và commit phiên bản mới của cùng dòng, mà không bên nào chặn bên nào.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">database</span>
+          <span class="tag">transactions</span>
+          <span class="tag">concurrency</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/write-ahead-log/"
+         data-type="sequence"
+         data-search="write-ahead log wal durability crash recovery redo fsync database storage-engine">
+        <h2>Write-Ahead Log: Durability Before the Data Page Is Flushed</h2>
+        <p class="desc" data-lang="en">The engine logs a change and acknowledges it before the data page is ever touched — so a crash mid-flush is recovered by replaying the log, not by losing the write.</p>
+        <p class="desc" data-lang="vi" hidden>Engine ghi log và xác nhận thay đổi trước khi data page bị đụng tới — nên crash giữa lúc flush được khôi phục bằng cách replay log, chứ không mất lần ghi.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">database</span>
+          <span class="tag">durability</span>
+          <span class="tag">storage-engine</span>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -299,6 +359,45 @@
           <span class="tag">networking</span>
           <span class="tag">tls</span>
           <span class="tag">performance</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="category-section" id="batch-stream-processing" data-category-label="Batch & Stream Processing">
+    <div class="category-head">
+      <h2 class="category-title">Batch &amp; Stream Processing</h2>
+    </div>
+    <p class="category-desc" data-lang="en">Change data capture and message queues — how systems move data to each other continuously instead of in nightly batches.</p>
+    <p class="category-desc" data-lang="vi" hidden>Change data capture và message queue — cách các hệ thống chuyển dữ liệu cho nhau liên tục thay vì qua batch job chạy đêm.</p>
+    <div class="grid">
+      <a class="card"
+         href="diagrams/change-data-capture/"
+         data-type="dataflow"
+         data-search="change data capture cdc debezium wal binlog transaction log streaming database integration">
+        <h2>Change Data Capture: Streaming Database Changes</h2>
+        <p class="desc" data-lang="en">A connector tails the database's own transaction log and turns every row change into a stream event — no polling, no extra query load, no missed deletes.</p>
+        <p class="desc" data-lang="vi" hidden>Một connector tail chính transaction log của database và biến mỗi thay đổi dòng thành một event stream — không poll, không thêm tải query, không bỏ sót delete.</p>
+        <div class="meta-row">
+          <span class="badge">dataflow</span>
+          <span class="tag">streaming</span>
+          <span class="tag">database</span>
+          <span class="tag">integration</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/message-queue-delivery-guarantees/"
+         data-type="sequence"
+         data-search="message queue delivery guarantee at-least-once at-most-once exactly-once idempotent consumer broker duplicate">
+        <h2>Message Queue Delivery Guarantees: At-Least-Once Means Duplicates</h2>
+        <p class="desc" data-lang="en">A consumer crashes right after processing but before acking — the broker's at-least-once guarantee redelivers the message, and the card gets charged twice.</p>
+        <p class="desc" data-lang="vi" hidden>Consumer crash ngay sau khi xử lý nhưng trước khi ack — đảm bảo at-least-once của broker gửi lại message, và thẻ bị charge hai lần.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">messaging</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">reliability</span>
         </div>
       </a>
     </div>

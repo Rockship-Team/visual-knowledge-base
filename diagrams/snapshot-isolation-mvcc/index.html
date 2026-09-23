@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Snapshot Isolation via MVCC: Readers Never Block Writers — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/snapshot-isolation-mvcc" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Snapshot Isolation via MVCC: Readers Never Block Writers</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">database</span>
+    <span class="tag">transactions</span>
+    <span class="tag">concurrency</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Snapshot isolation via MVCC sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Shows how <strong>Multi-Version Concurrency Control (MVCC)</strong> gives a long-running transaction a consistent <strong>Snapshot Isolation</strong> view of the database, even while another transaction writes and commits a change to the exact row it's reading — without either transaction ever blocking the other.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Every time a transaction reads a row while another transaction concurrently updates and commits a change to that same row.</p>
+    <p><strong>Where to spot it:</strong> Long-running reports or exports running alongside live traffic, PostgreSQL's default <code>REPEATABLE READ</code> (which is actually Snapshot Isolation), and any "why did my report show old numbers even though the dashboard already updated" question.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Transaction A</strong> begins and takes a snapshot — from this point on, it will only ever see the version of each row as it existed at this moment (<code>v1</code>).</li>
+      <li>A reads <code>balance = 100</code> (<code>v1</code>).</li>
+      <li><strong>Transaction B</strong> begins, updates the same row to <code>150</code>, and commits — this creates a new version, <code>v2</code>, without taking any lock that would block A.</li>
+      <li>A reads the same row again, using the same snapshot: it still sees <code>balance = 100</code>, <code>v1</code> — never <code>v2</code>.</li>
+    </ol>
+    <p class="callout">A never blocked B, and B never blocked A — they simply operated on different versions of the same row, each one consistent with the moment it started.</p>
+
+    <h2>How Snapshot Isolation Avoids Blocking</h2>
+    <ul>
+      <li>Every transaction reads the version of each row that was committed at the moment its own snapshot was taken</li>
+      <li>Writers never block readers and readers never block writers, because they simply operate on different versions of the same row</li>
+      <li>No read locks are needed — this is why MVCC scales so much better than lock-based isolation under mixed read/write load</li>
+    </ul>
+
+    <h2>The Trade-off: Write Skew</h2>
+    <ul>
+      <li>Snapshot Isolation prevents dirty reads and non-repeatable reads, but not <strong>Write Skew</strong></li>
+      <li>Two transactions can each read overlapping data, both pass a check that looked safe, and both commit — together violating an invariant neither one alone would have broken</li>
+      <li>Serializable Snapshot Isolation (SSI) closes this gap by detecting the dangerous read/write pattern and aborting one transaction</li>
+    </ul>
+
+    <h2>Old Versions Have a Cost</h2>
+    <ul>
+      <li>A row version can't be deleted the instant it's superseded — some other transaction's snapshot might still need it</li>
+      <li>A background process (e.g. PostgreSQL's <code>VACUUM</code>) reclaims versions only once no active snapshot could possibly reference them</li>
+      <li>Long-running transactions delay this cleanup and are a common cause of table bloat</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/snapshot-isolation-mvcc/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Minh họa cách <strong>Multi-Version Concurrency Control (MVCC)</strong> cho một transaction chạy lâu một góc nhìn <strong>Snapshot Isolation</strong> nhất quán về database, ngay cả khi một transaction khác ghi và commit thay đổi vào đúng dòng nó đang đọc — mà không transaction nào phải chặn transaction kia.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Mỗi khi một transaction đọc một dòng trong lúc một transaction khác đồng thời cập nhật và commit thay đổi vào chính dòng đó.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Báo cáo hoặc export chạy lâu song song với traffic thực, mức isolation mặc định <code>REPEATABLE READ</code> của PostgreSQL (thực chất là Snapshot Isolation), và câu hỏi kiểu "sao báo cáo của em vẫn hiện số cũ dù dashboard đã cập nhật rồi".</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Transaction A</strong> bắt đầu và lấy một snapshot — từ giờ trở đi, nó chỉ thấy phiên bản của mỗi dòng đúng như tại thời điểm này (<code>v1</code>).</li>
+      <li>A đọc <code>balance = 100</code> (<code>v1</code>).</li>
+      <li><strong>Transaction B</strong> bắt đầu, cập nhật cùng dòng thành <code>150</code>, rồi commit — tạo ra phiên bản mới <code>v2</code>, không cần khóa nào có thể chặn A.</li>
+      <li>A đọc lại cùng dòng, vẫn dùng snapshot cũ: vẫn thấy <code>balance = 100</code>, <code>v1</code> — không bao giờ thấy <code>v2</code>.</li>
+    </ol>
+    <p class="callout">A không hề chặn B, và B cũng không hề chặn A — cả hai đơn giản là thao tác trên hai phiên bản khác nhau của cùng một dòng, mỗi phiên bản nhất quán với thời điểm nó bắt đầu.</p>
+
+    <h2>Cách Snapshot Isolation Tránh Blocking</h2>
+    <ul>
+      <li>Mỗi transaction đọc đúng phiên bản của mỗi dòng đã được commit tại thời điểm snapshot của chính nó được lấy</li>
+      <li>Writer không bao giờ chặn reader và reader không bao giờ chặn writer, vì chúng đơn giản thao tác trên các phiên bản khác nhau của cùng một dòng</li>
+      <li>Không cần read lock nào cả — đây là lý do MVCC scale tốt hơn hẳn so với isolation dựa trên lock khi tải đọc/ghi trộn lẫn</li>
+    </ul>
+
+    <h2>Đánh Đổi: Write Skew</h2>
+    <ul>
+      <li>Snapshot Isolation ngăn được dirty read và non-repeatable read, nhưng không ngăn được <strong>Write Skew</strong></li>
+      <li>Hai transaction có thể mỗi bên đọc dữ liệu chồng lấn nhau, đều pass một kiểm tra tưởng như an toàn, rồi cùng commit — kết hợp lại vi phạm một ràng buộc mà một mình mỗi transaction không hề vi phạm</li>
+      <li>Serializable Snapshot Isolation (SSI) đóng lỗ hổng này bằng cách phát hiện pattern đọc/ghi nguy hiểm và abort một trong hai transaction</li>
+    </ul>
+
+    <h2>Phiên Bản Cũ Cũng Có Chi Phí</h2>
+    <ul>
+      <li>Một phiên bản dòng không thể bị xóa ngay khi bị thay thế — transaction khác có thể vẫn cần đến nó qua snapshot của mình</li>
+      <li>Một tiến trình chạy nền (ví dụ <code>VACUUM</code> của PostgreSQL) chỉ dọn dẹp phiên bản khi không còn snapshot đang hoạt động nào có thể tham chiếu tới nó</li>
+      <li>Transaction chạy lâu làm trì hoãn việc dọn dẹp này và là nguyên nhân phổ biến gây phình bảng (table bloat)</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/snapshot-isolation-mvcc/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

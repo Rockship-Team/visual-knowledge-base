@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Message Queue Delivery Guarantees: At-Least-Once Means Duplicates — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/message-queue-delivery-guarantees" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Message Queue Delivery Guarantees: At-Least-Once Means Duplicates</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">messaging</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">reliability</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Message queue at-least-once delivery duplicate sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Shows how a message broker's <strong>at-least-once delivery</strong> guarantee — retry until acked — can cause a consumer to process the same message twice, charging a customer's card two times for one order.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Any time a consumer processes a message but crashes, hangs, or loses its connection before it can send the ack back to the broker.</p>
+    <p><strong>Where to spot it:</strong> Payment processing consumers, order fulfillment pipelines, webhook delivery systems, and any "why was the customer charged twice" incident involving a message queue.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li>A <strong>Producer</strong> publishes <code>order.created</code> once. The <strong>Broker</strong> persists it and won't discard it until it gets an ack.</li>
+      <li>The broker delivers the message to the <strong>Consumer</strong>, which charges the customer's card through the <strong>Payment Gateway</strong> — successfully.</li>
+      <li>The consumer crashes right before it can send the ack back to the broker.</li>
+      <li>The broker's ack timeout fires. Since it has no way to know the charge already succeeded, it <strong>redelivers</strong> the same message.</li>
+      <li>The consumer processes it again and charges the card a second time.</li>
+    </ol>
+    <p class="callout">The broker did exactly what it promised — at-least-once — the duplicate charge happened because the consumer wasn't built to handle it.</p>
+
+    <h2>Why "At-Least-Once" Means Duplicates Are Possible</h2>
+    <ul>
+      <li>The broker's only guarantee is that the message gets delivered one or more times, never zero</li>
+      <li>It has no way to tell "consumer crashed before processing" apart from "consumer crashed right after processing but before acking"</li>
+      <li>So on any doubt — an ack timeout, a dropped connection — it resends</li>
+    </ul>
+
+    <h2>The Three Delivery Guarantees</h2>
+    <ul>
+      <li><strong>At-most-once:</strong> send and forget — a message can be lost, but is never duplicated</li>
+      <li><strong>At-least-once:</strong> retry until acked — a message can be duplicated, but is never lost</li>
+      <li><strong>Exactly-once (end-to-end)</strong> isn't a transport-level guarantee — it's at-least-once plus an idempotent consumer or dedup layer on top</li>
+    </ul>
+
+    <h2>How to Make the Consumer Safe</h2>
+    <ul>
+      <li>Track processed message IDs in a dedup table or cache with a TTL, and skip anything already seen</li>
+      <li>Make the side effect itself idempotent — "set status = charged" instead of "charge again"</li>
+      <li>Where the broker supports it, use its native exactly-once feature (Kafka transactions, SQS FIFO with a deduplication ID)</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/message-queue-delivery-guarantees/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Minh họa cách đảm bảo <strong>at-least-once delivery</strong> của message broker — retry cho tới khi được ack — có thể khiến consumer xử lý cùng một message hai lần, charge thẻ khách hàng hai lần cho một đơn hàng.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất cứ khi nào consumer đã xử lý xong một message nhưng crash, treo, hoặc mất kết nối trước khi kịp gửi ack về cho broker.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Consumer xử lý thanh toán, pipeline hoàn tất đơn hàng, hệ thống gửi webhook, và bất kỳ sự cố "sao khách bị charge hai lần" nào liên quan tới message queue.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li>Một <strong>Producer</strong> publish <code>order.created</code> đúng một lần. <strong>Broker</strong> lưu bền vững và không xóa cho tới khi nhận được ack.</li>
+      <li>Broker gửi message tới <strong>Consumer</strong>, consumer charge thẻ khách hàng qua <strong>Payment Gateway</strong> — thành công.</li>
+      <li>Consumer crash ngay trước khi kịp gửi ack về broker.</li>
+      <li>Ack timeout của broker kích hoạt. Vì không có cách nào biết charge đã thành công, broker <strong>gửi lại</strong> cùng message.</li>
+      <li>Consumer xử lý lại và charge thẻ lần thứ hai.</li>
+    </ol>
+    <p class="callout">Broker đã làm đúng như cam kết — at-least-once — việc charge trùng xảy ra vì consumer không được xây dựng để xử lý tình huống này.</p>
+
+    <h2>Vì Sao "At-Least-Once" Nghĩa Là Có Thể Trùng Lặp</h2>
+    <ul>
+      <li>Cam kết duy nhất của broker là message được gửi một lần hoặc nhiều hơn, không bao giờ là zero lần</li>
+      <li>Broker không có cách nào phân biệt "consumer crash trước khi xử lý" với "consumer crash ngay sau khi xử lý nhưng trước khi ack"</li>
+      <li>Nên bất cứ khi nào nghi ngờ — ack timeout, mất kết nối — broker sẽ gửi lại</li>
+    </ul>
+
+    <h2>Ba Mức Đảm Bảo Delivery</h2>
+    <ul>
+      <li><strong>At-most-once:</strong> gửi rồi bỏ qua — message có thể mất, nhưng không bao giờ trùng lặp</li>
+      <li><strong>At-least-once:</strong> retry cho tới khi được ack — message có thể trùng lặp, nhưng không bao giờ mất</li>
+      <li><strong>Exactly-once (end-to-end)</strong> không phải là đảm bảo ở tầng transport — nó là at-least-once cộng thêm một consumer idempotent hoặc lớp dedup phía trên</li>
+    </ul>
+
+    <h2>Làm Sao Để Consumer An Toàn</h2>
+    <ul>
+      <li>Theo dõi message ID đã xử lý trong bảng dedup hoặc cache có TTL, bỏ qua bất cứ gì đã thấy</li>
+      <li>Làm cho chính side effect trở thành idempotent — "set status = charged" thay vì "charge lại"</li>
+      <li>Nếu broker hỗ trợ, dùng tính năng exactly-once gốc của nó (Kafka transaction, SQS FIFO với deduplication ID)</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/message-queue-delivery-guarantees/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

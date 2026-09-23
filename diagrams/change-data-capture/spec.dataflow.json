@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Change Data Capture: Streaming Database Changes",
+    "output": "diagrams/change-data-capture/diagram.html",
+    "viewBox": [1075, 640],
+    "quality_profile": "showcase"
+  },
+  "stages": [
+    { "label": "Write" },
+    { "label": "Primary DB (WAL)" },
+    { "label": "CDC Connector" },
+    { "label": "Event Stream" },
+    { "label": "Consumers" }
+  ],
+  "nodes": [
+    { "id": "app", "type": "external", "label": "Application", "sublabel": "INSERT / UPDATE / DELETE", "stage": 0, "row": 1, "width": 150 },
+    { "id": "db", "type": "database", "label": "Primary DB", "sublabel": "row committed to WAL / binlog", "stage": 1, "row": 1, "width": 150 },
+    { "id": "connector", "type": "backend", "label": "CDC Connector", "sublabel": "tails the log", "stage": 2, "row": 1 },
+    { "id": "topic", "type": "messagebus", "label": "Event Stream", "sublabel": "one topic per table", "stage": 3, "row": 1 },
+    { "id": "consumers", "type": "external", "label": "Downstream Consumers", "sublabel": "search, cache, warehouse", "stage": 4, "row": 1, "width": 175 }
+  ],
+  "flows": [
+    { "id": "app-db", "from": "app", "to": "db", "label": "write", "variant": "emphasis", "route": "straight", "labelDy": -23 },
+    { "id": "db-connector", "from": "db", "to": "connector", "label": "tail the transaction log", "variant": "default", "route": "straight", "labelDy": -23 },
+    { "id": "connector-topic", "from": "connector", "to": "topic", "label": "publish change event", "variant": "default", "route": "straight", "labelDy": -23 },
+    { "id": "topic-consumers", "from": "topic", "to": "consumers", "label": "stream, each consumer reads independently", "variant": "default", "route": "straight", "labelDy": -23 }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Why Tail the Log Instead of Polling",
+      "items": [
+        "Reading the transaction log captures every change, including deletes, with no extra query load on the production database",
+        "It never misses a row that changed and changed back between two poll intervals",
+        "Each downstream consumer — a search index, a cache, a data warehouse — reads the same stream independently, at its own pace"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "What CDC Guarantees (and What It Doesn't)",
+      "items": [
+        "Changes are delivered in commit order per row — but at-least-once, so a connector restart can redeliver the same event",
+        "Downstream consumers must apply changes idempotently, exactly like any other message-queue consumer",
+        "CDC doesn't rewrite your data model — it mirrors whatever the source table's schema already is"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Where It Breaks Down",
+      "items": [
+        "Schema changes (DDL) need special handling so the connector adapts without silently dropping events",
+        "A connector that falls too far behind can be evicted from the log's retention window, forcing a full table resnapshot",
+        "High-churn tables can produce more change events than downstream consumers can keep up with"
+      ]
+    }
+  ]
+}

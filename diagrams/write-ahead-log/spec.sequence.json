@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Write-Ahead Log: Durability Before the Data Page Is Flushed",
+    "output": "diagrams/write-ahead-log/diagram.html",
+    "viewBox": [950, 700],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "client", "type": "external", "label": "Client", "sublabel": "sends an update" },
+    { "id": "db_engine", "type": "backend", "label": "DB Engine", "sublabel": "handles writes" },
+    { "id": "wal", "type": "database", "label": "WAL (disk)", "sublabel": "append-only log" },
+    { "id": "data_pages", "type": "database", "label": "Data Pages (disk)", "sublabel": "actual table storage" }
+  ],
+  "segments": [
+    { "from": 145, "to": 305, "label": "Normal write: log first, then acknowledge — the data page can be flushed later" },
+    { "from": 305, "to": 360, "label": "Crash: the data page update never reached disk, but the WAL already has it" },
+    { "from": 360, "to": 535, "label": "Recovery: replay the WAL to redo everything committed but not yet flushed" }
+  ],
+  "messages": [
+    { "id": "client-write", "from": "client", "to": "db_engine", "y": 160, "label": "UPDATE balance = 150", "variant": "default" },
+    { "id": "append-wal", "from": "db_engine", "to": "wal", "y": 200, "label": "APPEND: UPDATE balance=150 (txn 42)", "variant": "default" },
+    { "id": "wal-fsync-ret", "from": "wal", "to": "db_engine", "y": 240, "label": "fsync'd to disk", "variant": "return" },
+    { "id": "db-ack-client", "from": "db_engine", "to": "client", "y": 280, "label": "OK: committed", "variant": "return" },
+    { "id": "flush-interrupted", "from": "db_engine", "to": "data_pages", "y": 330, "label": "flush dirty page — interrupted by crash", "variant": "dashed" },
+    { "id": "recovery-start", "from": "db_engine", "to": "wal", "y": 385, "label": "RECOVERY: replay log since last checkpoint", "variant": "default" },
+    { "id": "replay-return", "from": "wal", "to": "db_engine", "y": 425, "label": "txn 42: UPDATE balance=150 (was committed)", "variant": "return" },
+    { "id": "reapply", "from": "db_engine", "to": "data_pages", "y": 465, "label": "RE-APPLY: balance = 150", "variant": "emphasis" },
+    { "id": "page-updated-ret", "from": "data_pages", "to": "db_engine", "y": 505, "label": "page updated", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "db_engine", "from": 165, "to": 515, "type": "backend" },
+    { "participant": "wal", "from": 205, "to": 245, "type": "database" },
+    { "participant": "wal", "from": 390, "to": 430, "type": "database" },
+    { "participant": "data_pages", "from": 335, "to": 345, "type": "database" },
+    { "participant": "data_pages", "from": 470, "to": 510, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Why Log Before Touching the Data",
+      "items": [
+        "Appending to a sequential log is one fast, predictable disk operation — no seeking around a B-tree page",
+        "Updating the actual data page can be deferred and batched, off the write's critical path, without risking durability",
+        "The client's 'committed' only needs the log entry to be on disk, not the final page layout"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "What Recovery Actually Does",
+      "items": [
+        "On restart, the engine finds the last checkpoint and replays every WAL entry written after it",
+        "Any operation the log says was committed, but whose data page never made it to disk, gets re-applied",
+        "This is called redo recovery — it never has to ask the client to resend anything"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Where This Shows Up",
+      "items": [
+        "PostgreSQL's WAL and MySQL/InnoDB's redo log",
+        "SQLite's WAL journal mode",
+        "LSM-tree engines (RocksDB, Cassandra) still write a WAL before the write ever reaches the memtable"
+      ]
+    }
+  ]
+}

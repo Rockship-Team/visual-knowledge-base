@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Message Queue Delivery Guarantees: At-Least-Once Means Duplicates",
+    "output": "diagrams/message-queue-delivery-guarantees/diagram.html",
+    "viewBox": [980, 650],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "producer", "type": "external", "label": "Producer", "sublabel": "publishes once" },
+    { "id": "broker", "type": "backend", "label": "Message Broker", "sublabel": "at-least-once delivery" },
+    { "id": "consumer", "type": "external", "label": "Consumer", "sublabel": "handles the order" },
+    { "id": "gateway", "type": "external", "label": "Payment Gateway", "sublabel": "charges the card" }
+  ],
+  "segments": [
+    { "from": 145, "to": 215, "label": "Producer publishes once; broker persists it until it receives an ack" },
+    { "from": 215, "to": 345, "label": "Consumer receives the message and charges the card — but crashes before it can ack" },
+    { "from": 345, "to": 465, "label": "Ack never arrives, so at-least-once redelivers — the card gets charged twice" }
+  ],
+  "messages": [
+    { "id": "producer-publish", "from": "producer", "to": "broker", "y": 160, "label": "PUBLISH order.created (id=abc123)", "variant": "default" },
+    { "id": "broker-ack-producer", "from": "broker", "to": "producer", "y": 195, "label": "OK: persisted, waiting for consumer ack", "variant": "return" },
+    { "id": "broker-deliver", "from": "broker", "to": "consumer", "y": 240, "label": "DELIVER order.created (id=abc123)", "variant": "default" },
+    { "id": "consumer-charge-1", "from": "consumer", "to": "gateway", "y": 280, "label": "CHARGE $50 (attempt 1)", "variant": "default" },
+    { "id": "gateway-charged-1", "from": "gateway", "to": "consumer", "y": 315, "label": "charged", "variant": "return" },
+    { "id": "broker-redeliver", "from": "broker", "to": "consumer", "y": 365, "label": "REDELIVER — no ack received (at-least-once retry)", "variant": "emphasis" },
+    { "id": "consumer-charge-2", "from": "consumer", "to": "gateway", "y": 405, "label": "CHARGE $50 (attempt 2)", "variant": "emphasis" },
+    { "id": "gateway-charged-2", "from": "gateway", "to": "consumer", "y": 440, "label": "charged — customer billed twice", "variant": "emphasis" }
+  ],
+  "activations": [
+    { "participant": "broker", "from": 165, "to": 200, "type": "backend" },
+    { "participant": "broker", "from": 245, "to": 370, "type": "backend" },
+    { "participant": "consumer", "from": 245, "to": 320, "type": "external" },
+    { "participant": "consumer", "from": 370, "to": 445, "type": "external" },
+    { "participant": "gateway", "from": 285, "to": 320, "type": "external" },
+    { "participant": "gateway", "from": 410, "to": 445, "type": "external" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Why 'At-Least-Once' Means Duplicates Are Possible",
+      "items": [
+        "The broker's only guarantee is that the message gets delivered one or more times, never zero",
+        "It has no way to tell 'consumer crashed before processing' apart from 'consumer crashed right after processing but before acking'",
+        "So on any doubt — an ack timeout, a dropped connection — it resends"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "The Three Delivery Guarantees",
+      "items": [
+        "At-most-once: send and forget — a message can be lost, but is never duplicated",
+        "At-least-once: retry until acked — a message can be duplicated, but is never lost",
+        "Exactly-once (end-to-end) isn't a transport-level guarantee — it's at-least-once plus an idempotent consumer or dedup layer on top"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "How to Make the Consumer Safe",
+      "items": [
+        "Track processed message IDs in a dedup table or cache with a TTL, and skip anything already seen",
+        "Make the side effect itself idempotent — 'set status = charged' instead of 'charge again'",
+        "Where the broker supports it, use its native exactly-once feature (Kafka transactions, SQS FIFO with a deduplication ID)"
+      ]
+    }
+  ]
+}

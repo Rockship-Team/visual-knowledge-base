@@ -25,6 +25,7 @@ Mỗi chủ đề nằm trong `diagrams/<slug>/` gồm:
 | Leader Election: Raft Consensus Basics | lifecycle | [diagrams/leader-election-raft](./diagrams/leader-election-raft) |
 | Eventual Consistency: Read-Your-Writes Anomaly | dataflow | [diagrams/eventual-consistency](./diagrams/eventual-consistency) |
 | Two-Phase Commit: Atomic Commit Across Two Databases | sequence | [diagrams/two-phase-commit](./diagrams/two-phase-commit) |
+| Multi-Leader Replication: Write Conflicts and Resolution | sequence | [diagrams/multi-leader-replication-conflicts](./diagrams/multi-leader-replication-conflicts) |
 
 ### Database & Storage
 
@@ -35,6 +36,9 @@ Mỗi chủ đề nằm trong `diagrams/<slug>/` gồm:
 | Database Indexing: Index Scan vs Full Table Scan | workflow | [diagrams/database-indexing-btree](./diagrams/database-indexing-btree) |
 | Leader-Based Replication: Synchronous vs Asynchronous Followers | sequence | [diagrams/leader-replication-sync-async](./diagrams/leader-replication-sync-async) |
 | LSM-Tree vs B-Tree: Write-Optimized Storage Engines | workflow | [diagrams/lsm-tree-vs-btree](./diagrams/lsm-tree-vs-btree) |
+| Partitioning: Consistent Hashing vs Modulo Hashing | workflow | [diagrams/consistent-hashing-partitioning](./diagrams/consistent-hashing-partitioning) |
+| Snapshot Isolation via MVCC: Readers Never Block Writers | sequence | [diagrams/snapshot-isolation-mvcc](./diagrams/snapshot-isolation-mvcc) |
+| Write-Ahead Log: Durability Before the Data Page Is Flushed | sequence | [diagrams/write-ahead-log](./diagrams/write-ahead-log) |
 
 ### Networking & API
 
@@ -43,6 +47,13 @@ Mỗi chủ đề nằm trong `diagrams/<slug>/` gồm:
 | Rate Limiting: The Token Bucket Algorithm | sequence | [diagrams/rate-limiting-token-bucket](./diagrams/rate-limiting-token-bucket) |
 | Load Balancing: Routing Around Unhealthy Instances | architecture | [diagrams/load-balancing-health-checks](./diagrams/load-balancing-health-checks) |
 | TCP and TLS Handshake: What Happens Before Your First Byte | sequence | [diagrams/tcp-tls-handshake](./diagrams/tcp-tls-handshake) |
+
+### Batch & Stream Processing
+
+| Chủ đề | Loại | Link |
+|---|---|---|
+| Change Data Capture: Streaming Database Changes | dataflow | [diagrams/change-data-capture](./diagrams/change-data-capture) |
+| Message Queue Delivery Guarantees: At-Least-Once Means Duplicates | sequence | [diagrams/message-queue-delivery-guarantees](./diagrams/message-queue-delivery-guarantees) |
 
 ## Đóng góp thêm chủ đề
 
