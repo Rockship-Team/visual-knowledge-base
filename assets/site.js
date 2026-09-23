@@ -20,6 +20,7 @@
     btn.type = "button";
     btn.className = "pill";
     btn.textContent = label;
+    if (value !== "all") btn.setAttribute("data-type", value);
     btn.setAttribute("aria-pressed", value === "all" ? "true" : "false");
     btn.addEventListener("click", function () {
       activeType = value;
@@ -76,4 +77,12 @@
 
   if (searchInput) searchInput.addEventListener("input", applyFilter);
   applyFilter();
+
+  var topicCount = cards.length;
+  var categoryCount = sections.length;
+  document.querySelectorAll(".stat-line [data-lang]").forEach(function (el) {
+    el.textContent = el.textContent
+      .replace("{{topics}}", topicCount)
+      .replace("{{categories}}", categoryCount);
+  });
 })();

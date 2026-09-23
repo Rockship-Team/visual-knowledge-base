@@ -46,4 +46,9 @@
       setLang(btn.getAttribute("data-set-lang"));
     });
   });
+
+  var topicBadge = document.querySelector(".topic-meta .badge");
+  if (topicBadge) {
+    document.body.setAttribute("data-topic-type", topicBadge.textContent.trim());
+  }
 })();
