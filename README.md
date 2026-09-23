@@ -24,6 +24,7 @@ Mỗi chủ đề nằm trong `diagrams/<slug>/` gồm:
 | CAP Theorem: Consistency vs Availability During a Network Partition | workflow | [diagrams/cap-theorem](./diagrams/cap-theorem) |
 | Leader Election: Raft Consensus Basics | lifecycle | [diagrams/leader-election-raft](./diagrams/leader-election-raft) |
 | Eventual Consistency: Read-Your-Writes Anomaly | dataflow | [diagrams/eventual-consistency](./diagrams/eventual-consistency) |
+| Two-Phase Commit: Atomic Commit Across Two Databases | sequence | [diagrams/two-phase-commit](./diagrams/two-phase-commit) |
 
 ### Database & Storage
 
@@ -32,6 +33,8 @@ Mỗi chủ đề nằm trong `diagrams/<slug>/` gồm:
 | Transaction Isolation Levels: Preventing the Non-Repeatable Read | sequence | [diagrams/transaction-isolation-levels](./diagrams/transaction-isolation-levels) |
 | The N+1 Query Problem | sequence | [diagrams/n-plus-one-query](./diagrams/n-plus-one-query) |
 | Database Indexing: Index Scan vs Full Table Scan | workflow | [diagrams/database-indexing-btree](./diagrams/database-indexing-btree) |
+| Leader-Based Replication: Synchronous vs Asynchronous Followers | sequence | [diagrams/leader-replication-sync-async](./diagrams/leader-replication-sync-async) |
+| LSM-Tree vs B-Tree: Write-Optimized Storage Engines | workflow | [diagrams/lsm-tree-vs-btree](./diagrams/lsm-tree-vs-btree) |
 
 ### Networking & API
 

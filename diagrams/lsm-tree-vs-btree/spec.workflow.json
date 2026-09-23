@@ -1,0 +1,78 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "LSM-Tree vs B-Tree: Write-Optimized Storage Engines",
+    "output": "diagram.html",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    { "id": "flow", "label": "Main Path" },
+    { "id": "btree_lane", "label": "B-Tree Engine", "variant": "exception" },
+    { "id": "lsm_lane", "label": "LSM-Tree Engine" }
+  ],
+  "phases": [
+    { "id": "incoming", "label": "Write Arrives", "fromCol": 0, "toCol": 1 },
+    { "id": "strategy", "label": "Storage Engine Write Path", "fromCol": 2, "toCol": 4, "variant": "emphasis" },
+    { "id": "result", "label": "Acknowledged", "fromCol": 5, "toCol": 5 }
+  ],
+  "mainPath": [
+    "client",
+    "engine",
+    "lsm_wal",
+    "lsm_memtable",
+    "lsm_flush",
+    "return_ack"
+  ],
+  "nodes": [
+    { "id": "client", "lane": "flow", "col": 0, "type": "external", "label": "Client", "sublabel": "INSERT/UPDATE row", "width": 150 },
+    { "id": "engine", "lane": "flow", "col": 1, "type": "backend", "label": "Storage Engine", "sublabel": "fixed per database at setup", "width": 150 },
+    { "id": "btree_seek", "lane": "btree_lane", "col": 2, "type": "database", "label": "Seek Leaf Page", "sublabel": "random disk I/O to locate the page", "width": 160 },
+    { "id": "btree_write", "lane": "btree_lane", "col": 3, "type": "database", "label": "In-Place Update", "sublabel": "modify the page, log to WAL", "width": 160 },
+    { "id": "btree_fsync", "lane": "btree_lane", "col": 4, "type": "database", "label": "fsync Page", "sublabel": "flush the dirty page to disk", "width": 160 },
+    { "id": "lsm_wal", "lane": "lsm_lane", "col": 2, "type": "database", "label": "Append to WAL", "sublabel": "sequential write, durability first", "width": 160 },
+    { "id": "lsm_memtable", "lane": "lsm_lane", "col": 3, "type": "database", "label": "Write to Memtable", "sublabel": "sorted in-memory structure", "width": 160 },
+    { "id": "lsm_flush", "lane": "lsm_lane", "col": 4, "type": "database", "label": "Flush to SSTable", "sublabel": "background sequential write + compaction", "width": 190 },
+    { "id": "return_ack", "lane": "flow", "col": 5, "type": "external", "label": "Write Acknowledged", "sublabel": "client receives OK", "width": 150 }
+  ],
+  "edges": [
+    { "id": "client-engine", "from": "client", "to": "engine", "variant": "default" },
+    { "id": "engine-btree", "from": "engine", "to": "btree_seek", "label": "B-Tree engine (Postgres, InnoDB)", "variant": "dashed", "role": "branch" },
+    { "id": "engine-lsm", "from": "engine", "to": "lsm_wal", "label": "LSM-Tree engine (Cassandra, RocksDB, LevelDB)", "variant": "emphasis", "role": "branch" },
+    { "id": "btree-seek-write", "from": "btree_seek", "to": "btree_write", "variant": "dashed" },
+    { "id": "btree-write-fsync", "from": "btree_write", "to": "btree_fsync", "variant": "dashed" },
+    { "id": "btree-fsync-return", "from": "btree_fsync", "to": "return_ack", "variant": "dashed", "role": "return" },
+    { "id": "lsm-wal-memtable", "from": "lsm_wal", "to": "lsm_memtable", "variant": "emphasis" },
+    { "id": "lsm-memtable-flush", "from": "lsm_memtable", "to": "lsm_flush", "variant": "emphasis" },
+    { "id": "lsm-flush-return", "from": "lsm_flush", "to": "return_ack", "variant": "default", "role": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Why LSM Trees Write Faster",
+      "items": [
+        "Every write is a sequential append — first to the WAL, then to an in-memory memtable — with no random seeks",
+        "Compaction, which merges and reorganizes SSTables on disk, runs in the background off the write's critical path",
+        "This makes LSM trees the default choice for write-heavy workloads (time series, logs, event streams)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "The Cost LSM Pays Later",
+      "items": [
+        "A read may have to check the memtable plus several SSTables, since the same key can live in more than one place",
+        "Bloom filters cut down wasted disk lookups, but don't eliminate them",
+        "Compaction consumes background I/O and CPU — this is write amplification, LSM's core trade-off"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Why B-Trees Still Dominate OLTP",
+      "items": [
+        "Each key lives in exactly one place, so a read is a single predictable path from root to leaf",
+        "There is no compaction step and no write amplification from re-merging old data",
+        "This wins when reads on hot rows are frequent and writes are moderate — the classic OLTP shape"
+      ]
+    }
+  ]
+}

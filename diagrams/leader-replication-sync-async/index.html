@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Leader-Based Replication: Synchronous vs Asynchronous — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/leader-replication-sync-async" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Leader-Based Replication: Synchronous vs Asynchronous Followers</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">replication</span>
+    <span class="tag">database</span>
+    <span class="tag">distributed-systems</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Leader-based replication sync vs async sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Shows what happens on a single write in <strong>leader-based replication</strong> when one follower is <strong>synchronous</strong> (the leader waits for its ack before confirming the write) and another is <strong>asynchronous</strong> (it gets the copy in the background, with no guarantee it has landed before the client moves on).</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> On every write to a leader-based replicated database — the leader always has to decide, per follower, whether to wait for the replica to confirm before it tells the client the write succeeded.</p>
+    <p><strong>Where to spot it:</strong> PostgreSQL streaming replication configuration, MySQL semi-sync replication, MongoDB write concern, Kafka producer <code>acks</code> settings — anywhere a system exposes a durability-vs-latency knob for replicas.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Client</strong> sends a write to the <strong>Leader</strong>.</li>
+      <li>Leader replicates to the <strong>synchronous follower</strong> and <strong>waits</strong> for its acknowledgment.</li>
+      <li>Leader also sends the same data to the <strong>asynchronous follower</strong>, but does not wait for it.</li>
+      <li>As soon as the sync follower acks, the leader tells the client the write is committed — the async follower is still catching up.</li>
+      <li>The async follower's acknowledgment arrives later, well after the client already moved on.</li>
+    </ol>
+    <p class="callout">The client's "committed" only means the leader and the <strong>synchronous</strong> follower have the data — the async follower is temporarily behind, and would lose that write if the leader crashed before replicating to it.</p>
+
+    <h2>Root Cause</h2>
+    <ul>
+      <li>Replication factor doesn't guarantee immediate consistency — each follower can be configured with a different durability guarantee</li>
+      <li>A synchronous follower trades write latency for durability: the leader can't confirm faster than its slowest sync follower</li>
+      <li>An asynchronous follower trades durability for latency: it never blocks the leader, but can silently lag or lose the most recent writes on leader failure</li>
+    </ul>
+
+    <h2>How to Choose</h2>
+    <ul>
+      <li>Use at least one <strong>synchronous</strong> follower when losing the last few writes on leader failure is unacceptable (payments, inventory, financial ledgers)</li>
+      <li>Keep the rest <strong>asynchronous</strong> to avoid one slow replica stalling every write — this is called semi-synchronous replication</li>
+      <li>If a synchronous follower goes down, most systems either block writes or automatically fail over to treating another follower as synchronous — know which one your database does</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/leader-replication-sync-async/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Minh họa điều gì xảy ra với một lần ghi trong <strong>leader-based replication</strong> khi một follower là <strong>đồng bộ (synchronous)</strong> — leader đợi ack rồi mới xác nhận ghi — và một follower khác là <strong>bất đồng bộ (asynchronous)</strong> — nhận bản sao ở nền, không đảm bảo đã cập nhật kịp trước khi client tiếp tục.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Ở mọi lần ghi vào một database dùng leader-based replication — leader luôn phải quyết định, với từng follower, có đợi replica xác nhận trước khi báo client ghi thành công hay không.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Cấu hình streaming replication của PostgreSQL, semi-sync replication của MySQL, write concern của MongoDB, cấu hình <code>acks</code> của Kafka producer — bất cứ đâu hệ thống cho phép chỉnh nút đánh đổi durability-vs-latency cho replica.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> gửi yêu cầu ghi tới <strong>Leader</strong>.</li>
+      <li>Leader replicate sang <strong>follower đồng bộ</strong> và <strong>đợi</strong> ack từ follower đó.</li>
+      <li>Leader cũng gửi cùng dữ liệu sang <strong>follower bất đồng bộ</strong>, nhưng không đợi.</li>
+      <li>Ngay khi follower đồng bộ ack, leader báo client ghi đã commit — follower bất đồng bộ vẫn đang bắt kịp.</li>
+      <li>Ack của follower bất đồng bộ đến sau đó, khi client đã tiếp tục xử lý việc khác.</li>
+    </ol>
+    <p class="callout">"Committed" mà client nhận được chỉ có nghĩa là leader và follower <strong>đồng bộ</strong> đã có dữ liệu — follower bất đồng bộ tạm thời bị trễ, và sẽ mất luôn lần ghi đó nếu leader crash trước khi kịp replicate sang nó.</p>
+
+    <h2>Nguyên nhân</h2>
+    <ul>
+      <li>Số lượng bản sao (replication factor) không đảm bảo consistency tức thời — mỗi follower có thể cấu hình mức đảm bảo durability khác nhau</li>
+      <li>Follower đồng bộ đánh đổi write latency lấy durability: leader không thể xác nhận nhanh hơn follower đồng bộ chậm nhất</li>
+      <li>Follower bất đồng bộ đánh đổi durability lấy latency: không bao giờ chặn leader, nhưng có thể âm thầm bị trễ hoặc mất các ghi gần nhất khi leader chết</li>
+    </ul>
+
+    <h2>Cách lựa chọn</h2>
+    <ul>
+      <li>Dùng ít nhất một follower <strong>đồng bộ</strong> khi việc mất vài ghi gần nhất lúc leader chết là không chấp nhận được (thanh toán, tồn kho, sổ cái tài chính)</li>
+      <li>Giữ các follower còn lại <strong>bất đồng bộ</strong> để một replica chậm không làm nghẽn mọi lần ghi — gọi là semi-synchronous replication</li>
+      <li>Nếu follower đồng bộ bị down, hầu hết hệ thống hoặc chặn ghi, hoặc tự động chuyển một follower khác thành đồng bộ — cần biết rõ database của mình xử lý theo cách nào</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/leader-replication-sync-async/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

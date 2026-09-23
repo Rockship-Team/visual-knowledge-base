@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Leader-Based Replication: Synchronous vs Asynchronous Followers",
+    "output": "diagrams/leader-replication-sync-async/diagram.html",
+    "viewBox": [950, 700],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "client", "type": "external", "label": "Client", "sublabel": "writes one row" },
+    { "id": "leader", "type": "database", "label": "Leader", "sublabel": "accepts all writes" },
+    { "id": "follower_sync", "type": "database", "label": "Follower (Sync)", "sublabel": "must ack before commit" },
+    { "id": "follower_async", "type": "database", "label": "Follower (Async)", "sublabel": "catches up in background" }
+  ],
+  "segments": [
+    { "from": 145, "to": 250, "label": "Leader waits for the synchronous follower to confirm" },
+    { "from": 250, "to": 320, "label": "Async follower gets a fire-and-forget copy, write already committed" },
+    { "from": 320, "to": 420, "label": "Async follower acks late, well after the client moved on" }
+  ],
+  "messages": [
+    { "id": "client-write", "from": "client", "to": "leader", "y": 160, "label": "WRITE users.email = 'new@x.com'", "variant": "default" },
+    { "id": "leader-sync-replicate", "from": "leader", "to": "follower_sync", "y": 195, "label": "REPLICATE (wait for ack)", "variant": "default" },
+    { "id": "sync-ack", "from": "follower_sync", "to": "leader", "y": 230, "label": "ACK: row written", "variant": "return" },
+    { "id": "leader-async-replicate", "from": "leader", "to": "follower_async", "y": 270, "label": "REPLICATE (fire-and-forget)", "variant": "default" },
+    { "id": "leader-client-ack", "from": "leader", "to": "client", "y": 300, "label": "OK: write committed", "variant": "return" },
+    { "id": "async-ack-late", "from": "follower_async", "to": "leader", "y": 360, "label": "ACK: row written (arrives late)", "variant": "emphasis" }
+  ],
+  "activations": [
+    { "participant": "leader", "from": 165, "to": 305, "type": "database" },
+    { "participant": "follower_sync", "from": 200, "to": 235, "type": "database" },
+    { "participant": "follower_async", "from": 275, "to": 365, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "What Sync vs Async Trades Off",
+      "items": [
+        "A synchronous follower guarantees the write survives even if the leader dies right after committing",
+        "But the leader must block on that follower — a slow or unreachable sync follower stalls every write",
+        "An asynchronous follower never blocks the leader, but the most recent writes can be lost if the leader crashes before replicating them"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Why Not Make Every Follower Synchronous",
+      "items": [
+        "Waiting for all followers turns one slow or down replica into an outage for every write",
+        "Most systems use semi-synchronous replication: one sync follower (promoted on failure) plus N async followers",
+        "This bounds the durability risk without paying full-quorum latency on every write"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Where This Shows Up",
+      "items": [
+        "PostgreSQL: synchronous_commit and synchronous_standby_names",
+        "MySQL: semi-synchronous replication plugin",
+        "MongoDB: write concern w: \"majority\"",
+        "Kafka: acks=all with min.insync.replicas"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Two-Phase Commit: Atomic Commit Across Two Databases — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/two-phase-commit" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">Two-Phase Commit: Atomic Commit Across Two Databases</h1>
+  <div class="topic-meta">
+    <span class="badge">sequence</span>
+    <span class="tag">distributed-systems</span>
+    <span class="tag">transactions</span>
+    <span class="tag">consensus</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="Two-phase commit sequence diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Shows how <strong>Two-Phase Commit (2PC)</strong> makes a transaction spanning two independent databases succeed or fail as a single atomic unit: a coordinator first asks every participant to <em>promise</em> it can commit, and only then tells everyone to actually commit.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Whenever a single logical transaction must change data in more than one database, service, or partition, and all of them need to commit together or not at all.</p>
+    <p><strong>Where to spot it:</strong> Cross-shard transactions, XA transactions in JTA/JMS, moving money between accounts that live in different database instances, and any "distributed transaction manager" library.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li><strong>Client</strong> starts a transaction that debits an account in <strong>Participant A</strong> and credits one in <strong>Participant B</strong>.</li>
+      <li><strong>Phase 1 (Prepare):</strong> the <strong>Coordinator</strong> sends <code>PREPARE</code> to both participants. Each one locks the relevant rows, writes its intent to disk, and votes <code>YES</code> — a durable promise that it can commit even after a crash.</li>
+      <li><strong>Phase 2 (Commit):</strong> only after <em>both</em> vote yes does the coordinator send <code>COMMIT</code> to both. Each participant applies the change, releases its locks, and acknowledges.</li>
+      <li>The coordinator tells the client the transaction committed.</li>
+    </ol>
+    <p class="callout">If either participant had voted <code>NO</code> during Prepare, the coordinator would send <code>ABORT</code> to both instead — the whole transaction rolls back, nothing is half-applied.</p>
+
+    <h2>Root Cause of the Design</h2>
+    <ul>
+      <li>A transaction across two databases has no single log to make the change atomic — 2PC builds atomicity on top by adding a coordination round</li>
+      <li>Splitting into Prepare/Commit means every participant learns everyone else's intent before anyone applies a real change</li>
+      <li>The price is a hard dependency on the coordinator: if it disappears between the two phases, participants are stuck holding locks, unable to decide alone</li>
+    </ul>
+
+    <h2>What to Watch Out For</h2>
+    <ul>
+      <li><strong>The blocking window</strong>: a coordinator crash after votes but before COMMIT/ABORT leaves participants holding locks until it recovers</li>
+      <li><strong>Coordinator durability</strong>: the coordinator must persist its decision before sending COMMIT, so it can resume correctly after its own crash</li>
+      <li><strong>Prefer avoiding cross-node 2PC</strong> when possible — model transactions to fit inside one partition, use a single consensus-backed log (Raft/Paxos), or use sagas with compensating actions instead</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/two-phase-commit/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>Minh họa cách <strong>Two-Phase Commit (2PC)</strong> giúp một transaction trải trên hai database độc lập thành công hoặc thất bại như một khối atomic duy nhất: coordinator trước tiên yêu cầu mọi participant <em>hứa</em> rằng có thể commit, rồi mới yêu cầu tất cả thực sự commit.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Bất cứ khi nào một transaction logic duy nhất cần thay đổi dữ liệu ở nhiều database, service, hoặc partition khác nhau, và tất cả phải cùng commit hoặc không commit gì cả.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Transaction xuyên shard, XA transaction trong JTA/JMS, chuyển tiền giữa các tài khoản nằm ở các database instance khác nhau, và bất kỳ thư viện "distributed transaction manager" nào.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> bắt đầu một transaction trừ tiền tài khoản ở <strong>Participant A</strong> và cộng tiền ở <strong>Participant B</strong>.</li>
+      <li><strong>Phase 1 (Prepare):</strong> <strong>Coordinator</strong> gửi <code>PREPARE</code> tới cả hai participant. Mỗi bên khóa các dòng liên quan, ghi ý định xuống đĩa, và vote <code>YES</code> — một lời hứa bền vững rằng có thể commit ngay cả sau khi crash.</li>
+      <li><strong>Phase 2 (Commit):</strong> chỉ khi <em>cả hai</em> vote yes, coordinator mới gửi <code>COMMIT</code> tới cả hai. Mỗi participant áp dụng thay đổi, giải phóng lock, và xác nhận.</li>
+      <li>Coordinator báo client transaction đã commit.</li>
+    </ol>
+    <p class="callout">Nếu một trong hai participant vote <code>NO</code> lúc Prepare, coordinator sẽ gửi <code>ABORT</code> cho cả hai thay vì COMMIT — toàn bộ transaction rollback, không có gì bị áp dụng nửa vời.</p>
+
+    <h2>Nguyên nhân của thiết kế này</h2>
+    <ul>
+      <li>Một transaction trải trên hai database không có chung một log duy nhất để đảm bảo atomic — 2PC xây dựng tính atomic bằng cách thêm một vòng phối hợp</li>
+      <li>Tách thành Prepare/Commit nghĩa là mọi participant biết ý định của tất cả các bên khác trước khi ai đó thực sự áp dụng thay đổi</li>
+      <li>Cái giá phải trả là phụ thuộc cứng vào coordinator: nếu nó biến mất giữa hai phase, các participant bị kẹt giữ lock, không thể tự quyết định</li>
+    </ul>
+
+    <h2>Những Điều Cần Lưu Ý</h2>
+    <ul>
+      <li><strong>Cửa sổ blocking</strong>: coordinator crash sau khi nhận vote nhưng trước khi gửi COMMIT/ABORT khiến participant giữ lock cho tới khi coordinator hồi phục</li>
+      <li><strong>Coordinator phải bền vững</strong>: coordinator phải ghi quyết định xuống đĩa trước khi gửi COMMIT, để có thể tiếp tục đúng đắn sau khi tự crash</li>
+      <li><strong>Ưu tiên tránh 2PC xuyên node</strong> nếu có thể — thiết kế transaction nằm gọn trong một partition, dùng một log dựa trên consensus (Raft/Paxos), hoặc dùng saga với compensating action thay thế</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/two-phase-commit/spec.sequence.json" target="_blank" rel="noopener">spec.sequence.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate sequence path/to/spec.sequence.json --quality showcase --json
+node bin/archify.mjs deliver sequence path/to/spec.sequence.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Two-Phase Commit: Atomic Commit Across Two Databases",
+    "output": "diagrams/two-phase-commit/diagram.html",
+    "viewBox": [950, 760],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "client", "type": "external", "label": "Client", "sublabel": "cross-database transfer" },
+    { "id": "coordinator", "type": "backend", "label": "Coordinator", "sublabel": "drives the protocol" },
+    { "id": "db_a", "type": "database", "label": "Participant A", "sublabel": "debit account" },
+    { "id": "db_b", "type": "database", "label": "Participant B", "sublabel": "credit account" }
+  ],
+  "segments": [
+    { "from": 145, "to": 320, "label": "Phase 1: Prepare — coordinator asks everyone to promise" },
+    { "from": 320, "to": 500, "label": "Phase 2: Commit — only sent after both vote yes" }
+  ],
+  "messages": [
+    { "id": "client-begin", "from": "client", "to": "coordinator", "y": 160, "label": "BEGIN distributed transaction", "variant": "default" },
+    { "id": "prep-a", "from": "coordinator", "to": "db_a", "y": 195, "label": "PREPARE (debit $100)", "variant": "default" },
+    { "id": "prep-b", "from": "coordinator", "to": "db_b", "y": 230, "label": "PREPARE (credit $100)", "variant": "default" },
+    { "id": "vote-a", "from": "db_a", "to": "coordinator", "y": 265, "label": "VOTE YES, locked and logged", "variant": "return" },
+    { "id": "vote-b", "from": "db_b", "to": "coordinator", "y": 295, "label": "VOTE YES, locked and logged", "variant": "return" },
+    { "id": "commit-a", "from": "coordinator", "to": "db_a", "y": 345, "label": "COMMIT", "variant": "default" },
+    { "id": "commit-b", "from": "coordinator", "to": "db_b", "y": 375, "label": "COMMIT", "variant": "default" },
+    { "id": "ack-a", "from": "db_a", "to": "coordinator", "y": 415, "label": "ACK: committed, locks released", "variant": "return" },
+    { "id": "ack-b", "from": "db_b", "to": "coordinator", "y": 445, "label": "ACK: committed, locks released", "variant": "return" },
+    { "id": "coordinator-client", "from": "coordinator", "to": "client", "y": 480, "label": "Transaction committed", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "coordinator", "from": 165, "to": 490, "type": "backend" },
+    { "participant": "db_a", "from": 200, "to": 270, "type": "database" },
+    { "participant": "db_a", "from": 350, "to": 420, "type": "database" },
+    { "participant": "db_b", "from": 235, "to": 300, "type": "database" },
+    { "participant": "db_b", "from": 380, "to": 450, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "The Blocking Problem",
+      "items": [
+        "If the coordinator crashes after both vote yes but before sending COMMIT, both participants are stuck",
+        "They hold locks and can't unilaterally decide to commit or abort — they must wait for the coordinator to recover",
+        "This is 2PC's core weakness: it trades progress for atomicity"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Why Voting Yes Is a Real Promise",
+      "items": [
+        "A participant can still abort during Prepare, e.g. a constraint violation or lock timeout",
+        "Once it votes yes, it must be able to commit even after its own crash and restart — so the vote and pre-commit state are written to disk before replying",
+        "Only after every participant votes yes does the coordinator move to Phase 2"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Alternatives at Scale",
+      "items": [
+        "Three-phase commit adds a round trip to reduce the blocking window, but is rarely used in practice",
+        "Distributed databases increasingly avoid cross-node 2PC by using a single consensus log (Raft/Paxos) instead",
+        "Application-level sagas trade atomicity for availability: each step commits locally and failures trigger compensating actions"
+      ]
+    }
+  ]
+}

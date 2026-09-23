@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LSM-Tree vs B-Tree: Write-Optimized Storage Engines — Visual Knowledge Base</title>
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="breadcrumb" href="../../">
+      <span data-lang="en">← All topics</span><span data-lang="vi" hidden>← Tất cả chủ đề</span>
+    </a>
+    <div class="row">
+      <a class="brand" href="../../">Visual Knowledge Base</a>
+      <nav>
+        <a href="https://github.com/Rockship-Team/visual-knowledge-base/tree/main/diagrams/lsm-tree-vs-btree" target="_blank" rel="noopener">
+          <span data-lang="en">View on GitHub</span><span data-lang="vi" hidden>Xem trên GitHub</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en">EN</button>
+          <button type="button" data-set-lang="vi">VI</button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="topic-title">LSM-Tree vs B-Tree: Write-Optimized Storage Engines</h1>
+  <div class="topic-meta">
+    <span class="badge">workflow</span>
+    <span class="tag">storage-engine</span>
+    <span class="tag">database</span>
+    <span class="tag">indexing</span>
+  </div>
+
+  <div class="diagram-block">
+    <div class="bar">
+      <span><span data-lang="en">Interactive diagram — drag/zoom, switch theme, search nodes</span><span data-lang="vi" hidden>Diagram tương tác — kéo/zoom, đổi theme, tìm kiếm node</span></span>
+      <a href="diagram.html" target="_blank" rel="noopener"><span data-lang="en">Open fullscreen ↗</span><span data-lang="vi" hidden>Mở toàn màn hình ↗</span></a>
+    </div>
+    <iframe src="diagram.html" title="LSM-Tree vs B-Tree write path workflow diagram" loading="lazy"></iframe>
+  </div>
+
+  <div class="prose" data-lang="en">
+    <h2>Summary</h2>
+    <p>Compares the <strong>write path</strong> of the two dominant storage engine designs: a <strong>B-Tree</strong> engine updates a page in place, while an <strong>LSM-Tree</strong> engine only ever appends — the difference explains why write-heavy systems increasingly reach for LSM-based storage.</p>
+
+    <h2>When It Happens</h2>
+    <p><strong>When:</strong> Every time a row is inserted or updated, the storage engine decides how that write reaches disk — this diagram shows the two dominant strategies side by side.</p>
+    <p><strong>Where to spot it:</strong> Choosing a database for a write-heavy workload (logs, metrics, event streams, IoT ingestion), tuning compaction settings in RocksDB/Cassandra/LevelDB, or diagnosing why an OLTP database (Postgres, MySQL) struggles under a huge burst of random-key inserts.</p>
+
+    <h2>Scenario</h2>
+    <ol>
+      <li>A <strong>Client</strong> sends an <code>INSERT</code>/<code>UPDATE</code>; the choice of storage engine was already fixed when the database was set up.</li>
+      <li><strong>B-Tree path:</strong> the engine seeks the exact leaf page on disk (random I/O), updates it in place, and eventually <code>fsync</code>s the dirty page.</li>
+      <li><strong>LSM-Tree path:</strong> the engine appends the write to a write-ahead log (sequential I/O), then writes it into an in-memory sorted structure (the memtable). The memtable is only flushed to an immutable SSTable on disk later, in the background, along with compaction that merges old SSTables.</li>
+      <li>Either way, the client eventually receives the write acknowledgment.</li>
+    </ol>
+    <p class="callout">The core difference: a B-Tree write always touches an existing page in place; an LSM-Tree write is always a brand-new sequential append. That's why LSM trees dominate write-heavy workloads.</p>
+
+    <h2>Root Cause</h2>
+    <ul>
+      <li>Disks (spinning or SSD) are dramatically faster at sequential writes than random writes</li>
+      <li>A B-Tree's "one copy of each key, in place" design guarantees fast, predictable reads — at the cost of a random seek on every write</li>
+      <li>An LSM-Tree's "append now, reconcile later" design turns every write into a sequential append — at the cost of extra work later (compaction) and reads that may need to check multiple files</li>
+    </ul>
+
+    <h2>How to Choose</h2>
+    <ul>
+      <li>Pick an <strong>LSM-Tree</strong> engine (Cassandra, RocksDB, LevelDB, ScyllaDB) for write-heavy, append-mostly workloads like logging, metrics, and event ingestion</li>
+      <li>Pick a <strong>B-Tree</strong> engine (PostgreSQL, MySQL/InnoDB, SQL Server) for classic OLTP workloads with frequent point reads on hot rows and moderate write volume</li>
+      <li>Watch LSM compaction load in production — it competes with foreground reads/writes for disk I/O and can cause latency spikes if misconfigured</li>
+    </ul>
+
+    <h2>Rebuild This Diagram</h2>
+    <p>Source: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/lsm-tree-vs-btree/spec.workflow.json" target="_blank" rel="noopener">spec.workflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate workflow path/to/spec.workflow.json --quality showcase --json
+node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+
+  <div class="prose" data-lang="vi" hidden>
+    <h2>Tóm tắt</h2>
+    <p>So sánh <strong>đường đi của một lần ghi</strong> giữa hai kiểu storage engine phổ biến nhất: engine <strong>B-Tree</strong> cập nhật trực tiếp tại chỗ (in-place) trên một page, còn engine <strong>LSM-Tree</strong> chỉ luôn luôn append — sự khác biệt này giải thích vì sao các hệ thống ghi nhiều ngày càng chọn storage dựa trên LSM.</p>
+
+    <h2>Khi Nào Gặp</h2>
+    <p><strong>Khi nào:</strong> Mỗi khi một dòng được insert hoặc update, storage engine phải quyết định lần ghi đó chạm tới đĩa như thế nào — diagram này đặt cạnh nhau hai chiến lược phổ biến nhất.</p>
+    <p><strong>Ở đâu dễ gặp:</strong> Chọn database cho workload ghi nhiều (log, metrics, event stream, ingest dữ liệu IoT), tinh chỉnh cấu hình compaction trong RocksDB/Cassandra/LevelDB, hoặc chẩn đoán vì sao một database OLTP (Postgres, MySQL) ì ạch khi có đợt insert ồ ạt với key ngẫu nhiên.</p>
+
+    <h2>Kịch bản</h2>
+    <ol>
+      <li><strong>Client</strong> gửi <code>INSERT</code>/<code>UPDATE</code>; storage engine đã được chọn cố định từ lúc thiết lập database.</li>
+      <li><strong>Đường B-Tree:</strong> engine tìm đúng leaf page trên đĩa (random I/O), cập nhật tại chỗ, rồi cuối cùng <code>fsync</code> page đã thay đổi.</li>
+      <li><strong>Đường LSM-Tree:</strong> engine append lần ghi vào write-ahead log (sequential I/O), rồi ghi vào một cấu trúc sắp xếp trong bộ nhớ (memtable). Memtable chỉ được flush thành SSTable bất biến trên đĩa sau đó, chạy nền, cùng với compaction gộp các SSTable cũ.</li>
+      <li>Dù theo đường nào, client cuối cùng cũng nhận được xác nhận ghi.</li>
+    </ol>
+    <p class="callout">Khác biệt cốt lõi: một lần ghi B-Tree luôn chạm vào một page đã tồn tại tại chỗ; một lần ghi LSM-Tree luôn là một append tuần tự hoàn toàn mới. Đó là lý do LSM tree thống trị các workload ghi nhiều.</p>
+
+    <h2>Nguyên nhân</h2>
+    <ul>
+      <li>Ổ đĩa (HDD hay SSD) đều nhanh hơn đáng kể ở ghi tuần tự so với ghi ngẫu nhiên</li>
+      <li>Thiết kế "mỗi key một bản duy nhất, tại chỗ" của B-Tree đảm bảo đọc nhanh, dễ đoán — đổi lại mỗi lần ghi phải random seek</li>
+      <li>Thiết kế "append trước, dọn dẹp sau" của LSM-Tree biến mọi lần ghi thành một append tuần tự — đổi lại phải làm thêm việc sau này (compaction) và việc đọc có thể phải kiểm tra nhiều file</li>
+    </ul>
+
+    <h2>Cách lựa chọn</h2>
+    <ul>
+      <li>Chọn engine <strong>LSM-Tree</strong> (Cassandra, RocksDB, LevelDB, ScyllaDB) cho workload ghi nhiều, chủ yếu append như logging, metrics, ingest event</li>
+      <li>Chọn engine <strong>B-Tree</strong> (PostgreSQL, MySQL/InnoDB, SQL Server) cho workload OLTP kinh điển với nhiều lần đọc điểm (point read) trên các dòng hot và lượng ghi vừa phải</li>
+      <li>Chú ý tải compaction của LSM trong production — nó cạnh tranh I/O đĩa với các lần đọc/ghi chính, và có thể gây tăng đột biến độ trễ nếu cấu hình sai</li>
+    </ul>
+
+    <h2>Sửa lại diagram này</h2>
+    <p>Nguồn: <a href="https://github.com/Rockship-Team/visual-knowledge-base/blob/main/diagrams/lsm-tree-vs-btree/spec.workflow.json" target="_blank" rel="noopener">spec.workflow.json</a></p>
+    <pre><code>git clone https://github.com/tt-a1i/archify.git
+cd archify
+node bin/archify.mjs validate workflow path/to/spec.workflow.json --quality showcase --json
+node bin/archify.mjs deliver workflow path/to/spec.workflow.json path/to/diagram.html --quality showcase --json</code></pre>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="../../"><span data-lang="en">← Back to catalog</span><span data-lang="vi" hidden>← Quay lại danh mục</span></a>
+  </div>
+</footer>
+<script src="../../assets/i18n.js"></script>
+</body>
+</html>

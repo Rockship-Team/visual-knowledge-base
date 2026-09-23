@@ -148,6 +148,21 @@
           <span class="tag">consistency</span>
         </div>
       </a>
+
+      <a class="card"
+         href="diagrams/two-phase-commit/"
+         data-type="sequence"
+         data-search="two-phase commit 2pc distributed transaction atomic coordinator participant consensus xa">
+        <h2>Two-Phase Commit: Atomic Commit Across Two Databases</h2>
+        <p class="desc" data-lang="en">A coordinator makes every participant promise it can commit before telling anyone to actually commit — atomicity across nodes, at the cost of a blocking window.</p>
+        <p class="desc" data-lang="vi" hidden>Coordinator bắt mọi participant hứa có thể commit trước khi yêu cầu commit thật — đảm bảo atomicity xuyên node, đổi lại một cửa sổ blocking.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">distributed-systems</span>
+          <span class="tag">transactions</span>
+          <span class="tag">consensus</span>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -199,6 +214,36 @@
           <span class="badge">workflow</span>
           <span class="tag">database</span>
           <span class="tag">performance</span>
+          <span class="tag">indexing</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/leader-replication-sync-async/"
+         data-type="sequence"
+         data-search="leader-based replication synchronous asynchronous follower durability latency database distributed-systems">
+        <h2>Leader-Based Replication: Synchronous vs Asynchronous Followers</h2>
+        <p class="desc" data-lang="en">The leader waits for a synchronous follower's ack before committing, while an asynchronous follower catches up in the background — a durability-vs-latency trade-off on every write.</p>
+        <p class="desc" data-lang="vi" hidden>Leader đợi ack của follower đồng bộ trước khi commit, trong khi follower bất đồng bộ bắt kịp ở nền — một đánh đổi durability-vs-latency ở mỗi lần ghi.</p>
+        <div class="meta-row">
+          <span class="badge">sequence</span>
+          <span class="tag">replication</span>
+          <span class="tag">database</span>
+          <span class="tag">distributed-systems</span>
+        </div>
+      </a>
+
+      <a class="card"
+         href="diagrams/lsm-tree-vs-btree/"
+         data-type="workflow"
+         data-search="lsm-tree b-tree write path storage engine compaction memtable sstable wal database performance">
+        <h2>LSM-Tree vs B-Tree: Write-Optimized Storage Engines</h2>
+        <p class="desc" data-lang="en">A B-Tree updates a page in place with a random seek; an LSM-Tree only ever appends — why write-heavy systems reach for LSM-based storage.</p>
+        <p class="desc" data-lang="vi" hidden>B-Tree cập nhật tại chỗ với một random seek; LSM-Tree chỉ luôn append — vì sao hệ thống ghi nhiều chọn storage dựa trên LSM.</p>
+        <div class="meta-row">
+          <span class="badge">workflow</span>
+          <span class="tag">storage-engine</span>
+          <span class="tag">database</span>
           <span class="tag">indexing</span>
         </div>
       </a>
