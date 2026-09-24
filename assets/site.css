@@ -194,9 +194,14 @@ a { color: var(--focus); }
   align-items: center;
   margin-bottom: 1.5rem;
 }
-.search-input {
+.search-wrap {
+  position: relative;
   flex: 1 1 240px;
-  padding: 0.6rem 0.85rem 0.6rem 2.3rem;
+  display: flex;
+}
+.search-input {
+  width: 100%;
+  padding: 0.6rem 2.3rem 0.6rem 2.3rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b6472' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.1' y2='16.1'/%3E%3C/svg%3E") no-repeat 0.75rem center;
@@ -206,6 +211,23 @@ a { color: var(--focus); }
   font-size: 0.92rem;
 }
 .search-input::placeholder { color: var(--muted); }
+.search-kbd {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.05rem 0.4rem;
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  .search-kbd { display: none; }
+}
 .pills {
   display: flex;
   flex-wrap: wrap;
@@ -263,6 +285,21 @@ a { color: var(--focus); }
   border-radius: var(--radius-sm);
 }
 .category-nav a:hover { color: var(--ink); border-color: var(--border-strong); }
+.category-nav .count {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+.category-nav a:hover .count { color: inherit; }
+.category-count {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.78rem;
+  vertical-align: middle;
+}
 
 /* category sections */
 .category-section {
@@ -541,6 +578,109 @@ body[data-topic-type="lifecycle"] .diagram-block iframe {
   font-size: 0.94rem;
 }
 .callout strong { color: inherit; }
+
+/* related topics */
+.related-topics { margin: 2.5rem 0 0; }
+.related-topics h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.9rem;
+  letter-spacing: -0.005em;
+}
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.7rem;
+}
+.related-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.12s ease, transform 0.12s ease;
+}
+.related-card:hover {
+  border-color: var(--accent-current);
+  transform: translateY(-1px);
+}
+.related-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* prev/next pager */
+.topic-pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+  margin: 2.75rem 0 0;
+}
+.pager-slot:only-child { grid-column: 1 / -1; }
+.pager-next { text-align: right; }
+.pager-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  height: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.12s ease, transform 0.12s ease;
+}
+.pager-next .pager-link { align-items: flex-end; }
+.pager-link:hover {
+  border-color: var(--accent-current);
+  transform: translateY(-1px);
+}
+.pager-dir {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--accent-current);
+  font-weight: 600;
+}
+.pager-cat {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.pager-title {
+  font-size: 0.94rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+@media (max-width: 560px) {
+  .topic-pager { grid-template-columns: 1fr; }
+  .pager-next { text-align: left; }
+  .pager-next .pager-link { align-items: flex-start; }
+}
+
+/* copy-to-clipboard on code blocks */
+.prose pre { position: relative; }
+.copy-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 500;
+  padding: 0.28rem 0.6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+.copy-btn:hover { border-color: var(--accent-current); color: var(--accent-current); }
 
 footer.site-footer {
   margin-top: 3.5rem;

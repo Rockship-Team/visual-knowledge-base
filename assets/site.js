@@ -45,12 +45,23 @@
   if (categoryNav) {
     sections.forEach(function (section) {
       var label = section.getAttribute("data-category-label") || section.id;
+      var count = section.querySelectorAll(".card").length;
       var a = document.createElement("a");
       a.href = "#" + section.id;
-      a.textContent = label;
+      a.innerHTML = label + ' <span class="count">' + count + "</span>";
       categoryNav.appendChild(a);
     });
   }
+
+  document.querySelectorAll(".category-section").forEach(function (section) {
+    var titleEl = section.querySelector(".category-title");
+    if (!titleEl) return;
+    var count = section.querySelectorAll(".card").length;
+    var badge = document.createElement("span");
+    badge.className = "category-count";
+    badge.textContent = count;
+    titleEl.appendChild(badge);
+  });
 
   function applyFilter() {
     var query = (searchInput && searchInput.value || "").trim().toLowerCase();
@@ -77,6 +88,21 @@
 
   if (searchInput) searchInput.addEventListener("input", applyFilter);
   applyFilter();
+
+  if (searchInput) {
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "/" && document.activeElement !== searchInput) {
+        var tag = document.activeElement && document.activeElement.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        e.preventDefault();
+        searchInput.focus();
+      } else if (e.key === "Escape" && document.activeElement === searchInput) {
+        searchInput.value = "";
+        applyFilter();
+        searchInput.blur();
+      }
+    });
+  }
 
   var topicCount = cards.length;
   var categoryCount = sections.length;

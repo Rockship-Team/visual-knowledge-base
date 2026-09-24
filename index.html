@@ -33,11 +33,14 @@
 
 <main class="wrap">
   <div class="toolbar">
-    <input id="catalog-search" class="search-input" type="search"
-           placeholder="Search by name, description, tag…"
-           data-ph-en="Search by name, description, tag…"
-           data-ph-vi="Tìm theo tên, mô tả, tag…"
-           aria-label="Search topics">
+    <div class="search-wrap">
+      <input id="catalog-search" class="search-input" type="search"
+             placeholder="Search by name, description, tag…"
+             data-ph-en="Search by name, description, tag…"
+             data-ph-vi="Tìm theo tên, mô tả, tag…"
+             aria-label="Search topics">
+      <kbd class="search-kbd">/</kbd>
+    </div>
     <div id="catalog-pills" class="pills"></div>
   </div>
   <nav id="category-nav" class="category-nav" aria-label="Jump to category"></nav>
